@@ -1,4 +1,4 @@
-O programa é composto pelos módulos: Main, Match, Board, Player, Piece, Dice, GUI e Database.
+A aplicação é composta pelos módulos: Main, Match, Board, Player, Piece, Dice, GUI e Database.
 
 # Main
 Apenas inicia o jogo com interface visual.
