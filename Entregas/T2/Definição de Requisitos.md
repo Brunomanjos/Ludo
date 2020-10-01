@@ -1,4 +1,4 @@
-A aplicação é composta pelos módulos: Main, Match, Board, Player, Piece, Dice, GUI e Database.
+A aplicação é composta pelos módulos: Main, Match, Board, Player, Piece, GUI e Database.
 
 # Main
 Apenas inicia o jogo com interface visual.
@@ -39,12 +39,6 @@ Representa as dezesseis peças coloridas.
 * Pegar todas as peças.
 * Pegar as peças com uma determinada cor.
 * Pegar a cor de uma peça.
-
-# Dice
-Simula um dado de seis lados.
-
-**Funcionalidades:**
-* Jogar dado: retorna um número entre 1 e 6, inclusive.
 
 # GUI
 Interface gráfica de interaçao com o usuário.
