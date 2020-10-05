@@ -17,7 +17,6 @@ Representa uma partida de ludo com as regras do jogo.
 * Verificar se a partida acabou. (três jogadores com todas as peças na região central)
 * Pegar a lista dos ganhadores, ordenados do primeiro para o último colocados.
 
-
 # Board
 Representa o tabuleiro do jogo, com as posições válidas das peças.
 
@@ -26,6 +25,9 @@ Representa o tabuleiro do jogo, com as posições válidas das peças.
 * Pegar a posição de início das peças de cada cor. (posição onde as peças são colocadas na primeira jogada) 
 * Pegar o caminho que uma peça deve fazer para se mover para outra casa. (lista das casas)
 * Pegar posição final das peças de cada cor.
+* Guardar as posições das peças.
+* Pegar as posições das peças, por cor, por posição ou todas.
+* Mudar as posições das peças.
 
 # Player
 Contém os nomes dos quatro jogadores da partida.
