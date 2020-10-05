@@ -20,14 +20,11 @@ Representa uma partida de ludo com as regras do jogo.
 # Board
 Representa o tabuleiro do jogo, com as posições válidas das peças.
 
-**Funcionalidades:**
-* Pegar as posições de origem das peças de cada cor.
-* Pegar a posição de início das peças de cada cor. (posição onde as peças são colocadas na primeira jogada) 
-* Pegar o caminho que uma peça deve fazer para se mover para outra casa. (lista das casas)
-* Pegar posição final das peças de cada cor.
+**Funcionalidades:** 
 * Guardar as posições das peças.
 * Pegar as posições das peças, por cor, por posição ou todas.
 * Mudar as posições das peças.
+* Verificar se uma peça está na posição final.
 
 # Player
 Contém os nomes dos quatro jogadores da partida.
