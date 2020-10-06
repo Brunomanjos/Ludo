@@ -9,31 +9,32 @@ Representa uma partida de ludo com as regras do jogo.
 **Funcionalidades:**
 * Criar nova partida, com quatro jogadores de nomes distintos.
 * Carregar partida salva.
-* Terminar partida, gerandom um dicionário com os dados para serem salvos.
+* Terminar partida, gerando um dicionário com os dados para serem salvos.
 * Selecionar o jogador do turno atual.
 * Pegar a cor das peças de um jogador.
-* Descobrir as jogadas possíveis para um determinado jogador.
 * Fazer uma jogada: mover uma peça ou pular a vez, caso não haja opção de mover as peças.
 * Verificar se a partida acabou. (três jogadores com todas as peças na região central)
 * Pegar a lista dos ganhadores, ordenados do primeiro para o último colocados.
 
 # Board
-Representa o tabuleiro do jogo, com as posições válidas das peças.
+Representa o tabuleiro do jogo, com as posições das peças.
 
 **Funcionalidades:** 
 * Guardar as posições das peças.
 * Pegar as posições das peças, por grupo, por posição ou todas.
 * Mudar as posições das peças.
-* Verificar quais peças estão nas posições finais.
+* Verificar quais peças estão na região central.
 * Colocar todas as peças em suas posições de origem.
-* Pegar as jogadas possíveis para um grupo.
+* Pegar as jogadas possíveis para um grupo de peças.
 
 # Player
 Contém os nomes dos quatro jogadores da partida.
 
 **Funcionalidades:**
+* Definir o nome de um jogador. O nome só pode ser definido antes de começar a partida.
 * Definir o nome dos quatro jogadores. Os nomes só podem ser definidos antes de começar a partida.
 * Pegar o nome dos quatro jogadores.
+* Pegar o neme de um jodador.
 
 # Piece
 Representa as dezesseis peças coloridas.
