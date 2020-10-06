@@ -22,9 +22,11 @@ Representa o tabuleiro do jogo, com as posições válidas das peças.
 
 **Funcionalidades:** 
 * Guardar as posições das peças.
-* Pegar as posições das peças, por cor, por posição ou todas.
+* Pegar as posições das peças, por grupo, por posição ou todas.
 * Mudar as posições das peças.
-* Verificar se uma peça está na posição final.
+* Verificar quais peças estão nas posições finais.
+* Colocar todas as peças em suas posições de origem.
+* Pegar as jogadas possíveis para um grupo.
 
 # Player
 Contém os nomes dos quatro jogadores da partida.
