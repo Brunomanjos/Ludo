@@ -6,7 +6,7 @@
 * Para jogar o dado, o jogador pressiona o botão com símbolo de dado.
 * Para mover uma peça, o jogador seleciona a peça e depois sua nova posição.
 * Para começar o jogo, os quatro jogam o dado até que saia um seis.
-* A pessoa que tirou seis começa movendo uma peça para a posição inicial e anda seis casas.
+* A pessoa que tirou seis começa movendo uma peça para a posição inicial e anda mais cinco casas.
 * Sempre que um jogador tira seis, ele joga o dado novamente.
 * Caso o jogador tire seis pela terceira vez seguida, ele perde a vez.
 * Ao fim de um turno, o tabuleiro gira noventa graus e o turno passa para o próximo jogador, no sentido horário.

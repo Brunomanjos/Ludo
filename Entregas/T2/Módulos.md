@@ -31,8 +31,8 @@ Representa o tabuleiro do jogo, com as posições das peças.
 Contém os nomes dos quatro jogadores da partida.
 
 **Funcionalidades:**
-* Definir o nome de um jogador. O nome só pode ser definido antes de começar a partida.
-* Definir o nome dos quatro jogadores. Os nomes só podem ser definidos antes de começar a partida.
+* Definir o nome de um jogador.
+* Definir o nome dos quatro jogadores.
 * Pegar o nome dos quatro jogadores.
 * Pegar o neme de um jodador.
 
