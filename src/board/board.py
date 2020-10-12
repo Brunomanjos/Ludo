@@ -1,17 +1,25 @@
 __all__ = ['get_next_point', 'get_spawn_points', 'get_finish_points', 'get_finish_point', 'is_finish_point',
            'get_pieces_positions', 'get_piece_position', 'move_piece', 'reset_board', 'get_pieces_at',
-           'get_possible_moves', 'get_path']
+           'get_possible_moves', 'get_path', 'END_OF_PATH', 'NOT_ON_PATH', 'INVALID_GROUP', 'NEGATIVE_STEPS',
+           'INVALID_PIECE_ID']
+
+END_OF_PATH = 1
+NOT_ON_PATH = 2
+INVALID_GROUP = 3
+NEGATIVE_STEPS = 4
+INVALID_PIECE_ID = 5
 
 
 def next_point_on_segment(seg_point1, seg_point2, current_point):
     """
-    Returns next point on segment that starts on point1 and ends at point2.
-    The segment must be horizontal or vertical.
+    Retorna o próximo ponto em um segmento entre seg_point1 e seg_point2.
+    O segmento deve ser horizontal ou vertical.
 
-    :param seg_point1: first point on segment
-    :param seg_point2: second point on segment
-    :param current_point: current position on segment
-    :return: next point on segment. None if position is not on segment
+    :param seg_point1: primeiro ponto do segmento
+    :param seg_point2: segundo ponto do segmento
+    :param current_point: ponto atual no segmento
+    :return: próximo ponto no segmento, caso o ponto atual pertença ao segmento
+     e seja diferente de seg_point2. None, caso contrário.
     """
 
     y1, x1 = seg_point1
@@ -36,121 +44,141 @@ def next_point_on_segment(seg_point1, seg_point2, current_point):
 
 def next_point_on_path(path_points, current_point):
     """
-    Returns the next point on path.
+    Retorna o próximo ponto em um caminho (conjunto de segmentos).
 
-    if position == points[-1], then next point will be outside path. In this case, will return 0
+    Caso current_point seja igual a path_points[-1], o próximo ponto será fora do caminho.
+    Nesse caso, será retornado END_OF_PATH.
 
-    :param path_points: point list that represents a path. must not be empty
-    :param current_point: current point on path
-    :return: next point on path. None if position is invalid. 0 if position == points[-1]
+    :param path_points: lista de pontos que configuram um caminho (conjunto de segmentos)
+    :param current_point: ponto atual no caminho
+    :return: próximo ponto no caminho, caso current_point pertença ao caminho e
+     seja diferente de path_points[-1]. END_OF_PATH se current_point for igual a path_points[-1].
+     NOT_ON_PATH, se o ponto não pertencer ao caminho.
     """
 
     if current_point == path_points[-1]:
-        return 0
+        return END_OF_PATH
 
     for index in range(len(path_points) - 1):
+        # forma segmentos para cada par de pontos e tenta pegar o próximo ponto no segmento.
         point1, point2 = path_points[index], path_points[index + 1]
         next_p = next_point_on_segment(point1, point2, current_point)
 
         if next_p:
             return next_p
 
+    return NOT_ON_PATH
+
 
 def next_point_on_central(current_point, piece_group):
     """
-    :param current_point: current point. May or may not be on central path
-    :param piece_group: group of the piece on current_point
-    :return: next point if current_point is on central path of its piece_group. None otherwise
-    """
-    central = board['central'][piece_group]
-    finish = board['finish'][piece_group]
-    if current_point == central['from']:
-        return central['to'], False
+    Retorna o próximo ponto no caminho central (última reta em que as peças passam para chegar no centro do
+    tabuleiro) e um indicativo (True/False) de overflow: Se verdaderio, significa que a peça excedeu o limite
+    de movimento e passou da posição final, voltando para o início do caminho central.
 
-    next_p = next_point_on_segment(central['to'], finish, current_point)
+    :param current_point: ponto atual. Pode não pertencer ao caminho central
+    :param piece_group: grupo da peça que está na posição current_point. Supõe que o grupo é válido
+    :return: próximo ponto no caminho central e o indicativo de overflow, caso current_point percença
+     ao caminho cetral e esse caminho seja válido para o grupo dado em piece_group. (NOT_ON_PATH, False), caso contrário.
+    """
+
+    central = board['central'][piece_group]  # caminho central para o grupo de piece_group
+
+    next_p = next_point_on_segment(central['from'], central['to'], current_point)
+
     if next_p:
         return next_p, False
-    elif current_point == finish:
-        return central['to'], True
+    elif current_point == central['to']:
+        next_p = next_point_on_segment(central['from'], central['to'], central['from'])
+        return next_p, True
+
+    return NOT_ON_PATH, False
 
 
 def next_point_on_main(current_point):
     """
-    :param current_point: current point on main path
-    :return: next point if current_point is on main path. None otherwise
+    Retorna o próximo ponto no caminho principal (caminho por onde as peças andam logo após sairem da origem).
+    Não considera o caminho central caso uma peça precise entrar nele.
+
+    :param current_point: ponto atual no caminho. Pode não pertencer ao caminho principal
+    :return: próximo ponto no caminho principal, caso current_point pertença ao caminho
+     principal. None, caso contrário.
     """
-    for index, path in enumerate(board['main']):
+    for path_index, path in enumerate(board['main']):
         next_p = next_point_on_path(path, current_point)
-        if next_p == 0:
-            next_path = (index + 1) % 4
-            return board['main'][next_path][0], False
-        elif next_p:
-            return next_p, False
+        if next_p == END_OF_PATH:
+            # retorna o primeiro ponto do próximo caminho
+            # como o caminho é em loop, caso path_index for 3 (último caminho), o próximo caminho é 0
+            next_path = (path_index + 1) % 4
+            return board['main'][next_path][0]
+        elif isinstance(next_p, tuple):
+            return next_p
 
 
 def next_point_on_spawn(current_point, piece_group):
     """
-    :param current_point: current point on spawn
-    :param piece_group: group of the piece on current_point
-    :return: next point if current_point is on spawn of its piece_group. None otherwise
+    Retorna o próximo ponto da origem das peças.
+
+    :param current_point: ponto atual. Pode não pertencer à origem
+    :param piece_group: grupo da peça que está na posição current_point. Supõe que o grupo é válido
+    :return: próximo ponto, no caminho central, caso o ponto atual
+     pertença à origem do grupo piece_group. None, caso contrário
     """
     spawn = board['spawn'][piece_group]
     if current_point in spawn['from']:
-        return spawn['to'], False
+        return spawn['to']
 
 
 def next_point_one_step(current_point, piece_group):
     """
-    If current_point is invalid, will return None, False.
-    Assumes that piece_group is valid.
+    Retorna o próximo ponto no tabulerio e um indicativo de overflow
+    (definido em next_point_on_central), caso o ponto atual seja válido.
 
-    :param current_point: current point on board
-    :param piece_group: group of the piece on current_point
-    :return: a pair (point, overflow).
-     The point is the next point on board.
-     The overflow is a bool that indicates if the current point is the last on central path,
-     and next point is at the beginning of the central path, causing the piece to go back
-    to the beginning of the central path.
+    :param current_point: ponto atual no tabuleiro
+    :param piece_group: grupo da peça que está na posição current_point. Supõe que o grupo é válido
+    :return: próximo ponto no tabuleiro e o indicativo de overflow, caso o ponto pertença ao tabuleiro.
+     (None, False), caso contrário
     """
 
-    next_p = next_point_on_central(current_point, piece_group)
-    if next_p:
-        return next_p
+    next_p, overflow = next_point_on_central(current_point, piece_group)
+    if isinstance(next_p, tuple):
+        return next_p, overflow
 
     next_p = next_point_on_main(current_point)
-    if next_p:
-        return next_p
+    if isinstance(next_p, tuple):
+        return next_p, False
 
     next_p = next_point_on_spawn(current_point, piece_group)
-    if next_p:
-        return next_p
+    if isinstance(next_p, tuple):
+        return next_p, False
 
-    return None, None
+    return None, False
 
 
 def get_next_point(current_point, piece_group, steps):
     """
-    :param current_point: current point on board
-    :param piece_group: group of the piece on current_point
-    :param steps: how many positions will the piece move
-    :return: next point if current_point is on board, piece_group is valid and steps >= 0.
-     1 if current_point is invalid.
-     2 if piece_group is invalid.
-     3 if steps &lt 0.
+    Retorna um ponto a 'steps' paços do ponto atual.
+
+    :param current_point: ponto atual no tabuleiro
+    :param piece_group: grupo da peça que está na posição current_point (entre 0 e 3, inclusive)
+    :param steps: quantos paços a peça vai andar
+    :return: próximo ponto no tabuleiro, caso current_point pertença ao tabuleiro,
+     piece_group seja válido e steps >= 0. NOT_ON_PATH, caso o ponto não pertença ao tabuleiro ou
+     seja invádio para o grupo piece_group.
+     INVALID_GROUP, caso o grupo seja inválido. NEVATIVE_STEPS, caso steps seja negativo.
     """
 
     if piece_group < 0 or piece_group > 3:
-        return 2
+        return INVALID_GROUP
     elif steps < 0:
-        return 3
+        return NEGATIVE_STEPS
 
     position = current_point
-    while steps > 0:
+    for step in range(steps):
         position, overflow = next_point_one_step(position, piece_group)
-        steps -= 1
 
         if position is None:
-            return 1
+            return NOT_ON_PATH
         elif overflow:
             break
 
@@ -159,12 +187,14 @@ def get_next_point(current_point, piece_group, steps):
 
 def get_spawn_points(piece_group=None):
     """
-    :param piece_group: piece group related to the spawn points. If None, all groups will be considered.
-    :return: spawn points of all groups, as a dict. The dict's keys are piece ids. None if piece_group is invalid.
+    Retorna os pontos de origem das peças, como um dicionário, em que as chaves são os ids das peças
+
+    :param piece_group: grupo das peças da origem desejada. Se for None, todos os grupos serão considerados
+    :return: pontos de origem do grupo desejado, caso piece_group seja válido. INVALID_GROUP caso contrário.
     """
 
     if piece_group and (piece_group < 0 or piece_group > 3):
-        return None
+        return INVALID_GROUP
 
     spawns = {}
 
@@ -178,42 +208,44 @@ def get_spawn_points(piece_group=None):
 
 def get_finish_points():
     """
-    :return: finish points for all piece groups, where the nth element on the list if the finish point of the nth group.
+    :return: pontos finais de todos os grupos de peças em uma lista em que os índices são os grupos das peças.
     """
-    return board['finish'].copy()
+    return [board['central'][group]['to'] for group in range(4)]
 
 
 def get_finish_point(piece_group):
     """
-    :param piece_group: group relative to the finish point.
-    :return: finish point of the piece_group. None if piece_group is invalid
+    :param piece_group: group relativo ao ponto final.
+    :return: ponto final do grupo piece_group, caso piece_group seja válido. INVALID_GROUP, caso contrário.
     """
 
     if piece_group < 0 or piece_group > 3:
-        return
-    return board['finish'][piece_group]
+        return INVALID_GROUP
+
+    return board['central'][piece_group]['to']
 
 
 def is_finish_point(point, piece_group=None):
     """
+    Verifica se o ponto é um ponto final.
 
-    :param point: point to check if is a finish point.
-    :param piece_group: piece group of the piece on this point, or None (default) if can be any group.
-    :return: True if the point is a finish point for the given piece_group.
-     False if the point is not a finish point and the piece_group is valid.
-     1 if piece_group is invalid.
+    :param point: point a ser verificado
+    :param piece_group: grupo da peça no ponto 'point', ou None se puder ser ponto final de qualquer grupo
+    :return: INVALID_GROUP, caso o grupo seja inválido.
+     True, caso o ponto seja ponto final do grupo piece_group. False, caso contrário.
     """
 
     if piece_group is None:
-        return point in board['finish']
+        return point in get_finish_points()
     elif piece_group < 0 or piece_group > 3:
-        return 1
-    return point == board['finish'][piece_group]
+        return INVALID_GROUP
+    return point == get_finish_point(piece_group)
 
 
 def reset_board():
     """
-    Resets the board to the original state. All pieces will go back to their spawn.
+    Move todas as peças para suas posições de origem.
+
     :return: None
     """
     global pieces
@@ -222,12 +254,14 @@ def reset_board():
 
 def get_pieces_positions(piece_group=None):
     """
-    :param piece_group: filters pieces by group. If None, all groups will be considered
-    :return: dict of piece positions given piece_group filter, where the dict's key is the piece_id.
-     None if piece_group is invalid
+    Retorna as posições das peças, filtradas por grupo.
+
+    :param piece_group: grupo das peças. Se for None, considera todas as peças
+    :return: posições das peças em um dicionário, em que as chaves são os ids das peças,
+     caso o piece_group seja válido. INVALID_GROUP, caso contrário
     """
     if piece_group and (piece_group < 0 or piece_group > 3):
-        return None
+        return INVALID_GROUP
 
     positions = pieces.copy()
     if piece_group is not None:
@@ -240,18 +274,20 @@ def get_pieces_positions(piece_group=None):
 
 def get_piece_position(piece_id):
     """
-    :param piece_id: piece's id
-    :return: piece's position if piece_id is valid. None otherwise
+    :param piece_id: id da peça
+    :return: posição da peça, caso piece_id seja válido. INVALID_PIECE_ID, caso contrário.
     """
     if piece_id < 0 or piece_id > 15:
-        return
+        return INVALID_PIECE_ID
     return pieces[piece_id]
 
 
 def get_pieces_at(position_filter):
     """
-    :param position_filter: where to check for pieces. Can be a position or a list of positions
-    :return: all pieces at the given position as a list, where the values are the pieces' ids
+    Retorna todas as peças dado o filtro de posições.
+
+    :param position_filter: onde verificar a existencia de peças. Pode ser uma posição ou uma lista de posições
+    :return: todas as peças nas posições em position_filter, em uma lista em que os valores são os ids das peças
     """
 
     if isinstance(position_filter, list):
@@ -261,41 +297,48 @@ def get_pieces_at(position_filter):
 
 
 def is_valid_position(position, piece_group):
-    return get_next_point(position, piece_group, 1) != 1
+    """
+    Verifica se uma posição é válida (pertence ao tabuleiro e pode ser conter uma peça do grupo piece_group)
+    :param position: posição a ser verificada
+    :param piece_group: grupo da peça na posição position
+    :return: True, caso o ponto seja válido. False caso contrário
+    """
+    return get_next_point(position, piece_group, 1) != NOT_ON_PATH
 
 
 def move_piece(piece_id, new_position):
     """
-    Moves a piece to a new position.
-    :param piece_id: piece's id
-    :param new_position: new piece position
-    :return: 0 if piece was moved, 1 if piece_id is invalid and 2 if new_position is invalid for the given piece.
+    Move a peça para uma nova posição.
+
+    :param piece_id: id da peça
+    :param new_position: nova posição
+    :return: None caso a peça tenha sido movida. INVALID_PIECE_ID caso o id seja inválido.
+     NOT_ON_PATH, caso a posição não seja válida para a peça.
     """
 
     if piece_id < 0 or piece_id > 15:
-        return 1
+        return INVALID_PIECE_ID
 
     if not is_valid_position(new_position, piece_id // 4):
-        return 2
+        return NOT_ON_PATH
 
     pieces[piece_id] = new_position
-
-    return 0
 
 
 def get_possible_moves(piece_group, steps):
     """
-    :param piece_group: pieces' group
-    :param steps: how many positions would the piece move
-    :return: all possible moves for pieces from piece_group as a dictionary
-     where the keys are the pieces' ids.
-     1 if piece_group is invalid.
-     2 if steps < 0
+    Retorna todas as jogadas possíveis para um grupo de peças.
+
+    :param piece_group: grupos de peças
+    :param steps: quantas posições as peças podem se mover
+    :return: todas as jogadas possíveis para o grupo de peças, em um dicionário em que as
+     chaves são os ids das peças, case o grupo seja válido e steps >= 0.
+     INVALID_GROUP, caso o grupo seja inválido. NEGATIVE_STEPS, caso steps seja negativo.
     """
     if piece_group < 0 or piece_group > 3:
-        return 1
+        return INVALID_GROUP
     elif steps < 0:
-        return 2
+        return NEGATIVE_STEPS
 
     start_id = 4 * piece_group
     end_id = start_id + 4
@@ -305,22 +348,23 @@ def get_possible_moves(piece_group, steps):
 
 def get_path(from_pos, piece_group, steps):
     """
-    :param from_pos: initial position from path
-    :param piece_group: piece group, to determine when the piece should enter to the central path
-    :param steps: how many steps will the piece move
-    :return: a list with all points between start and end positions.
-     If a overflow occurs, the path will end at the beginning of the central path.
-     1 if from_pos is invalid.
-     2 if piece_group is invalid.
-     3 if steps < 0.
-    """
+    Retorna uma lista com todos os pontos desde from_pos até from_pos + steps.
 
-    if not is_valid_position(from_pos, piece_group):
-        return 1
-    elif piece_group < 0 or piece_group > 3:
-        return 2
+    :param from_pos: posição inical do caminho
+    :param piece_group: grupo da peça que andará pelo caminho
+    :param steps: quantas posições a peça irá se mover
+    :return: lista com todos os pontos do caminho, considerando possível overflow,
+     caso from_pos pertença seja válido para o grupo piece_group, piece_group seja válido e steps >= 0.
+     INVALID_GROUP, caso o grupo seja inválido.
+     NOT_ON_PATH, caso from_pos não seja válido para o grupo piece_group.
+     NEGATIVE_STEPS, caso steps seja negativo.
+    """
+    if piece_group < 0 or piece_group > 3:
+        return INVALID_GROUP
+    elif not is_valid_position(from_pos, piece_group):
+        return NOT_ON_PATH
     elif steps < 0:
-        return 3
+        return NEGATIVE_STEPS
 
     path = [from_pos]
     while steps > 0:
@@ -357,18 +401,17 @@ board = {
     ],
     'central': [{
         'from': (7, 0),
-        'to': (7, 1)
+        'to': (7, 6)
     }, {
         'from': (0, 7),
-        'to': (1, 7)
+        'to': (6, 7)
     }, {
         'from': (14, 7),
-        'to': (13, 7)
+        'to': (8, 7)
     }, {
         'from': (7, 14),
-        'to': (7, 13)
-    }],
-    'finish': [(7, 6), (6, 7), (8, 7), (7, 8)]
+        'to': (7, 8)
+    }]
 }
 
 pieces = get_spawn_points()
