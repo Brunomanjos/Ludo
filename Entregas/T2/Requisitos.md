@@ -14,6 +14,7 @@
 * Caso uma peça A para na mesma posição de uma peça B, de cores diferentes, a peça B é movida para a posição de origem, e a peça A permanece na posição.
 * Caso uma peça A para na mesma posição de uma peça B, de cores iguais, as peças formam um bloco e começam a andar juntas.
 * Caso uma peça tente passar por um bloco (duas peças juntas), ela será posta na casa anterior, não podendo passar pelo bloco.
+* Um bloco pode passar por outro sem interferência.
 * Caso um bloco caia na mesma casa de outro, de cores diferentes, todas as peças voltam para suas posições de origem.
 * Quando uma peça completa uma volta no tabuleiro, passando pela posição demarcada com uma seta, ela entra na coluna do meio.
 * Na coluna do meio, é necessário tirar um número exato no dado para que a peça pare no triângulo final.
