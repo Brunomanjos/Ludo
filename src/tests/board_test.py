@@ -2,7 +2,7 @@
 
 import unittest
 import board
-from board.board import set_piece_position  # apenas para testes
+from board.board import set_piece_position, pieces  # apenas para testes
 
 
 class TestCase(unittest.TestCase):
@@ -190,8 +190,7 @@ class TestCase(unittest.TestCase):
 
     def help_27_move_one_piece_to_finish(self, piece):
         for iteration in range(100):
-            current_pos = board.get_piece_position(piece)
-            board.move_piece(current_pos, 1)
+            board.move_piece(piece, 1)
             if piece in board.get_pieces_at(board.get_finish_position(piece // 4)):
                 return
 
@@ -199,6 +198,7 @@ class TestCase(unittest.TestCase):
                                'to get to finish point. This should never happen')
 
     def test_27_all_pieces_from_spawn_to_finish_one_step(self):
+        board.reset_board()
         for piece in range(16):
             self.help_27_move_one_piece_to_finish(piece)
 

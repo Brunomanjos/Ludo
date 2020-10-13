@@ -493,7 +493,7 @@ def move_piece(piece_id, steps):
     pieces_at_new_pos = get_pieces_at(new_position)
     piece_group = piece_id // 4
 
-    if new_position == get_piece_position(piece_id) or len(pieces_at_new_pos) == 0:
+    if new_position == get_finish_position(piece_id // 4) or len(pieces_at_new_pos) == 0:
         # caso seja o final do tabuleiro ou não haja outra peça na nova posição, as peças podem se mover para lá
         for piece in pieces:
             set_piece_position(piece, new_position)
