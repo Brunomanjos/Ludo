@@ -1,0 +1,22 @@
+Primeira Entrega:
+    Itens de backlog
+    Diagrama Estrutural
+    Diagrama de Arquitetura Modular
+    Definição de Requisitos
+    Planejamento de Entregas
+
+Segunda Entrega:
+    Módulo Match, com testes automatizados
+    Módulo Board, com testes automatizados
+    Módulo Player, com testes automatizados
+    Módulo Piece, com testes automatizados
+    Jogo funcionando através de comandos manuais no console
+
+Terceira Entrega:
+    Módulo GUI, com testes automatizados
+    Módulo Main, com testes automatizados
+    Jogo funcionando com interface gráfica
+
+Quarta Entrega:
+    Módulo Database, com testes automatizados
+    Jogo funcionando completamente, com interface gráfica e histórico de partidas

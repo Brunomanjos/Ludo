@@ -1,0 +1,2 @@
+Para testar o funcionamento dos módulos, execute os testes localizados na pasta 'src/tests'.
+Cada arquivo representa o teste de um módulo.
