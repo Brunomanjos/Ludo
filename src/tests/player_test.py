@@ -4,7 +4,7 @@ import unittest
 import player
 
 
-class TestCase(unittest.TestCase):
+class PlayerTest(unittest.TestCase):
 
     def test_01_set_player_ok(self):
         self.assertTrue(player.set_player(0, 'Bruno'))

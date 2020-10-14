@@ -1,11 +1,10 @@
 # autor: Bruno Messeder dos Anjos
 
 import unittest
-import board
-from board.board import set_piece_position, pieces  # apenas para testes
+import board.board as board  # import dessa forma para ter acesso a funções privadas para teste
 
 
-class TestCase(unittest.TestCase):
+class BoardTest(unittest.TestCase):
 
     def test_01_get_spawn_points_ok(self):
         self.assertEqual({4: (2, 11), 5: (2, 12), 6: (3, 11), 7: (3, 12)}, board.get_spawn_positions(1))
@@ -61,25 +60,25 @@ class TestCase(unittest.TestCase):
         self.assertEqual(board.INVALID_PIECE_ID, board.get_piece_position(16))
 
     def test_13_set_piece_pos_invalid_position(self):
-        self.assertEqual(2, set_piece_position(0, (5, 5)))
-        self.assertEqual(2, set_piece_position(0, (-1, -1)))
-        self.assertEqual(2, set_piece_position(0, (7, 7)))
+        self.assertEqual(2, board.set_piece_position(0, (5, 5)))
+        self.assertEqual(2, board.set_piece_position(0, (-1, -1)))
+        self.assertEqual(2, board.set_piece_position(0, (7, 7)))
 
     def test_14_set_piece_pos_invalid_piece_id(self):
-        self.assertEqual(board.INVALID_PIECE_ID, set_piece_position(-1, (-1, -1)))
-        self.assertEqual(board.INVALID_PIECE_ID, set_piece_position(16, (-1, -1)))
+        self.assertEqual(board.INVALID_PIECE_ID, board.set_piece_position(-1, (-1, -1)))
+        self.assertEqual(board.INVALID_PIECE_ID, board.set_piece_position(16, (-1, -1)))
 
     def test_15_set_piece_pos_invalid_position_for_group(self):
         # a posição (1, 7) é válida apenas para o grupo 1
-        self.assertEqual(board.NOT_ON_PATH, set_piece_position(0, (1, 7)))
-        self.assertEqual(board.NOT_ON_PATH, set_piece_position(1, (1, 7)))
-        self.assertEqual(board.NOT_ON_PATH, set_piece_position(3, (1, 7)))
-        self.assertIsNone(set_piece_position(5, (1, 7)))
+        self.assertEqual(board.NOT_ON_PATH, board.set_piece_position(0, (1, 7)))
+        self.assertEqual(board.NOT_ON_PATH, board.set_piece_position(1, (1, 7)))
+        self.assertEqual(board.NOT_ON_PATH, board.set_piece_position(3, (1, 7)))
+        self.assertIsNone(board.set_piece_position(5, (1, 7)))
 
     def test_16_get_pieces_at(self):
-        set_piece_position(7, (6, 10))
-        set_piece_position(8, (6, 10))
-        set_piece_position(0, (6, 1))
+        board.set_piece_position(7, (6, 10))
+        board.set_piece_position(8, (6, 10))
+        board.set_piece_position(0, (6, 1))
         self.assertEqual([7, 8], board.get_pieces_at((6, 10)))
         self.assertEqual([0], board.get_pieces_at((6, 1)))
         self.assertEqual([], board.get_pieces_at((-1, -1)))
@@ -87,31 +86,31 @@ class TestCase(unittest.TestCase):
         self.assertEqual([0, 7, 8], board.get_pieces_at([(2, 2), (6, 10), (6, 1)]))
 
     def test_17_get_possible_move_ok(self):
-        set_piece_position(5, (0, 7))
-        set_piece_position(0, (3, 6))
+        board.set_piece_position(5, (0, 7))
+        board.set_piece_position(0, (3, 6))
         # uma peça passando por outra peça
         self.assertEqual((1, 8), board.get_possible_move(0, 6))
         self.assertEqual((0, 7), board.get_possible_move(0, 4))
         # uma peça passando por um bloco
-        set_piece_position(4, (0, 7))
+        board.set_piece_position(4, (0, 7))
         self.assertEqual((0, 6), board.get_possible_move(0, 6))
         self.assertEqual((0, 6), board.get_possible_move(0, 4))
         # um bloco passando por outro bloco
-        set_piece_position(1, (3, 6))
+        board.set_piece_position(1, (3, 6))
         self.assertEqual((1, 8), board.get_possible_move(0, 6))
         self.assertEqual((1, 8), board.get_possible_move(1, 6))
         self.assertEqual((0, 7), board.get_possible_move(0, 4))
         # um bloco passando por uma peça
-        set_piece_position(4, (1, 8))
+        board.set_piece_position(4, (1, 8))
         self.assertEqual((1, 8), board.get_possible_move(0, 6))
         self.assertEqual((0, 7), board.get_possible_move(0, 4))
         self.assertEqual((0, 7), board.get_possible_move(0, 4))
         # um bloco passando por uma peça, mesmo grupo
-        set_piece_position(2, (2, 6))
+        board.set_piece_position(2, (2, 6))
         self.assertEqual((1, 8), board.get_possible_move(0, 6))
         self.assertIsNone(board.get_possible_move(0, 1))
         # um bloco passando por outro bloco, mesmo grupo
-        set_piece_position(3, (2, 6))
+        board.set_piece_position(3, (2, 6))
         self.assertEqual((1, 8), board.get_possible_move(0, 6))
         self.assertIsNone(board.get_possible_move(0, 1))
 

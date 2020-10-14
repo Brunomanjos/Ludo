@@ -1,2 +1,5 @@
-Para testar o funcionamento dos módulos, execute os testes localizados na pasta 'src/tests'.
-Cada arquivo representa o teste de um módulo.
+autor: Bruno Messeder dos Anjos
+
+Para testar o funcionamento de todos os módulos, execute o código que está em 'src/tests/general_test.py'.
+
+Para testar cada módulo individualmente, execute o código do módulo que está em 'src/tests/<MÓDULO>_test.py', onde <MÓDULO> é o nome do módulo em questão.
