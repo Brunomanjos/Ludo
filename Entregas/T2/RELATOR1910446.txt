@@ -1,3 +1,5 @@
+autor: Bruno Messeder dos Anjos
+
 Requisitos do módulo Board:
 	Horas trabalhadas: 2 Horas
 	
