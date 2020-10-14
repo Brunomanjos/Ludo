@@ -1,3 +1,5 @@
+autor: Bruno Messeder dos Anjos
+
 O jogo é composto de quatro jogadores, um tabuleiro e peças agrupadas por cor.
 
 Na tela inicial há as opções de iniciar o jogo, ver histórico de partidas e sair.
