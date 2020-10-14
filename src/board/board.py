@@ -2,9 +2,8 @@
 
 __all__ = ['END_OF_PATH', 'NOT_ON_PATH', 'INVALID_GROUP', 'NEGATIVE_STEPS', 'INVALID_PIECE_ID', 'EMPTY_POSITION',
            'get_next_position', 'get_spawn_positions', 'get_finish_positions', 'get_finish_position',
-           'is_finish_position',
-           'get_pieces_positions', 'get_piece_position', 'reset_board', 'get_pieces_at', 'get_possible_move',
-           'get_possible_moves', 'get_path', 'move_piece']
+           'is_finish_position', 'get_pieces_positions', 'get_piece_position', 'reset_board', 'get_pieces_at',
+           'get_possible_move', 'get_possible_moves', 'get_path', 'move_piece']
 
 END_OF_PATH = 1
 NOT_ON_PATH = 2
@@ -376,18 +375,16 @@ def get_possible_move(piece_id, steps):
     finish_pos = get_finish_position(piece_group)
 
     path = get_path(original_position, piece_group, steps)
+    # passa por todos as posições até a posição final para verificar a existência de blocos impedindo a passagem.
     for index, step in enumerate(path[1:]):
         if step == finish_pos:
             if index == len(path) - 2:
-                # chegou ao final do tabuleiro
-                return path[-1]
+                return path[-1]  # chegou ao final do tabuleiro
             elif original_position != path[-1] and len(get_pieces_at(path[-1])) \
                     + len(get_pieces_at(original_position)) > 2:
-                # overflow com uma peça já na posição de overflow, impossibilitando a jogada
-                return
+                return  # overflow com uma peça já na posição de overflow, impossibilitando a jogada
             else:
-                # overflow com espaço para a peça
-                return path[-1]
+                return path[-1]  # overflow com espaço para a peça
         elif len(get_pieces_at(step)) == 2 and not is_block:
             # se tiver um bloco impedindo a passagem de uma peça, a peça para antes do bloco
             return path[index]
@@ -402,11 +399,9 @@ def get_possible_move(piece_id, steps):
         # do bloco, retona a última posição do caminho
         return path[-1]
 
-    # caso a nova posição seja a posição inicial, significa que a peça não pode se mover
     if path[-2] == original_position:
-        return
-    # caso contrário, retona a penúltima posição do caminho
-    return path[-2]
+        return  # caso a nova posição seja a posição inicial, significa que a peça não pode se mover
+    return path[-2]  # caso contrário, retona a penúltima posição do caminho
 
 
 def get_possible_moves(piece_group, steps):
