@@ -1,3 +1,5 @@
+# Módulo Player
+# Atualizado: 13/10/2020
 # autor: Bruno Messeder dos Anjos
 
 __all__ = ['set_player', 'set_players', 'get_player', 'get_players']

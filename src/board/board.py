@@ -1,3 +1,5 @@
+# Módulo Board
+# Atualizado: 14/10/2020
 # autor: Bruno Messeder dos Anjos
 
 __all__ = ['END_OF_PATH', 'NOT_ON_PATH', 'INVALID_GROUP', 'NEGATIVE_STEPS', 'INVALID_PIECE_ID', 'EMPTY_POSITION',
