@@ -1,4 +1,3 @@
 autor: Bruno Messeder dos Anjos
 
-Para testar o funcionamento de todos os módulos, execute o código 'python tests.py' no diretório '/src'.
-
+Para testar o funcionamento de todos os módulos, execute 'python tests.py' no diretório '/src'.
