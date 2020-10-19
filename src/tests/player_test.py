@@ -1,3 +1,5 @@
+# Teste Automatizado do módulo Player
+# Atualizado: 14/10/2020
 # autor: Bruno Messeder dos Anjos
 
 import unittest

@@ -1,3 +1,5 @@
+# Teste Automatizado do módulo Board
+# Atualizado: 15/10/2020
 # autor: Bruno Messeder dos Anjos
 
 import unittest
