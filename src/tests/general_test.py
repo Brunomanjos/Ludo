@@ -9,7 +9,7 @@ __all__ = []
 
 def run_tests():
     """
-    Roda todos os testes que estão no em 'tests/'
+    Roda todos os testes que estão em 'tests/'
     """
 
     loader = unittest.TestLoader()
