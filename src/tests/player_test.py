@@ -16,7 +16,6 @@ class PlayerTest(unittest.TestCase):
     def test_03_set_player_invalid_type(self):
         with self.assertRaises(TypeError) as handler:
             player.set_player(0, 3)
-        print('Expected exception:', handler.exception)
 
     def test_04_get_player_ok(self):
         self.assertEqual('Bruno', player.get_player(0))
@@ -36,8 +35,6 @@ class PlayerTest(unittest.TestCase):
     def test_07_set_players_invalid_type(self):
         with self.assertRaises(TypeError) as handler:
             player.set_players('Antônio', 'Bernardo', 'Bruno', None)
-
-        print('Expected exception:', handler.exception)
 
     def test_08_get_players(self):
         self.assertEqual(['Antônio', 'Bernardo', 'Bruno', 'Bot'], player.get_players())

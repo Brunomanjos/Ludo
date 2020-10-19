@@ -9,7 +9,7 @@ __all__ = []
 
 def run_tests():
     """
-    Roda todos os testes que estão em 'tests/'
+    Roda todos os testes que estão em '/tests'
     """
 
     loader = unittest.TestLoader()
@@ -18,7 +18,7 @@ def run_tests():
         tests, lambda member: inspect.isclass(member) and issubclass(member, unittest.TestCase))
 
     for class_name, _ in test_classes:
-        print("Testing Case:", class_name)
+        print("Caso de Teste:", class_name)
 
     suites = [loader.loadTestsFromTestCase(test_case) for _, test_case in test_classes]
 
