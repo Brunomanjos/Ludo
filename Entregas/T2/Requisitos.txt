@@ -22,8 +22,6 @@ Sempre que um jogador tira seis, ele joga o dado novamente.
 
 Caso o jogador tire seis pela terceira vez seguida, ele perde a vez.
 
-Ao fim de um turno, o tabuleiro gira noventa graus e o turno passa para o próximo jogador, no sentido horário.
-
 A área de origem das peças da pessoa que estiver jogando firacará sempre na esquerda em baixo.
 
 Caso uma peça A para na mesma posição de uma peça B, de cores diferentes, a peça B é movida para a posição de origem, e a peça A permanece na posição.
