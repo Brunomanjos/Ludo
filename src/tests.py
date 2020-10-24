@@ -2,9 +2,10 @@
 # Atualizado: 19/10/2020
 # autor: Bruno Messeder dos Anjos
 
-import unittest
-import tests
 import inspect
+import unittest
+
+import tests
 
 __all__ = []
 
