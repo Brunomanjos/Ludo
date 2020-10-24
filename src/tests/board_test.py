@@ -3,6 +3,7 @@
 # autor: Bruno Messeder dos Anjos
 
 import unittest
+
 import board.board as board  # import dessa forma para ter acesso a funções privadas para teste
 
 
