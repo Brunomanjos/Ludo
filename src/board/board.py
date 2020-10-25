@@ -4,7 +4,7 @@
 
 __all__ = ['END_OF_PATH', 'NOT_ON_PATH', 'INVALID_GROUP', 'NEGATIVE_STEPS', 'INVALID_PIECE_ID', 'EMPTY_POSITION',
            'get_finish_positions', 'get_finish_position', 'get_pieces_positions', 'get_piece_position', 'reset_board',
-           'get_pieces_at', 'get_possible_move', 'get_possible_moves', 'move_piece']
+           'get_pieces_at', 'get_possible_move', 'get_possible_moves', 'move_piece', 'get_spawn_positions']
 
 END_OF_PATH = 1
 NOT_ON_PATH = 2
