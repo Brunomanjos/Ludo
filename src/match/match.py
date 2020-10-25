@@ -40,6 +40,7 @@ def new_match(p1, p2, p3, p4):
     shuffle(groups)
 
     player.set_players(p1, p2, p3, p4)
+    board.reset_board()
 
     match = {
         'current_player': randint(0, 3),  # id do jogador atual
@@ -60,14 +61,16 @@ def make_move(piece_id, steps):
     :return: True caso a jogada tenha sido efetuada.
      MATCH_NOT_DEFINED caso a partida não tenha sido definida
      INVALID_PIECE caso o id da peça seja seja inválido.
+     INVALID_STEPS caso o número de paços seja inválido.
      INVALID_PLAYER caso a peça não pertença ao jogador do turno atual.
      MATCH_ENDED caso a partida tenha terminado.
-     INVALID_STEPS caso o número de paços seja inválido.
     """
     if not match:
         return MATCH_NOT_DEFINED
     elif piece_id < 0 or piece_id > 15:
         return INVALID_PIECE
+    elif steps < 1 or steps > 6:
+        return INVALID_STEPS
 
     current = current_player()
     if current == MATCH_ENDED:
@@ -77,24 +80,18 @@ def make_move(piece_id, steps):
     if group != piece_id // 4:
         return INVALID_PLAYER
 
-    if steps < 1 or steps > 6:
-        return INVALID_STEPS
-
     piece_pos = board.get_piece_position(piece_id)
     if piece_pos not in board.get_spawn_positions(group) or steps == 6:
         # move a peça se ela não estiver na posição inicial ou,
         # caso esteja, o número de paços seja igual a 6
         board.move_piece(piece_id, steps)
 
+    match['sequence'] += 1
+
     if steps < 6 or match['sequence'] >= 3:
         # muda o turno para o próximo jogador
         match['sequence'] = 0
         match['current_player'] = (match['current_player'] + 1) % 4
-    else:
-        # continua o turno com o mesmo jogador
-        match['sequence'] += 1
-
-    print(board.get_pieces_positions())
 
 
 def current_player():
