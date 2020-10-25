@@ -1,3 +1,7 @@
+# Módulo Match
+# Atualizado: 24/10/2020
+# autor: Bruno Messeder dos Anjos
+
 from random import shuffle, randint
 
 import board
