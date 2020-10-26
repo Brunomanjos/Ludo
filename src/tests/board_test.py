@@ -1,5 +1,5 @@
 # Teste Automatizado do módulo Board
-# Atualizado: 15/10/2020
+# Atualizado: 26/10/2020
 # autor: Bruno Messeder dos Anjos
 
 import unittest
@@ -157,25 +157,32 @@ class BoardTest(unittest.TestCase):
         self.assertEqual(board.get_spawn_positions(), board.get_pieces_positions())
 
     def test_26_move_piece_ok(self):
-        board.reset_board()
         self.assertTrue(board.move_piece(0, 6))
         self.assertEqual((5, 6), board.get_piece_position(0))
         self.assertTrue(board.move_piece(0, 10))
         self.assertEqual((3, 8), board.get_piece_position(0))
+
+    def test_27_move_one_piece_through_other(self):
         self.assertTrue(board.move_piece(4, 6))
         self.assertEqual((6, 9), board.get_piece_position(4))
-        # a peça 4 passa pela peça 0. nada acontece
         self.assertEqual((3, 8), board.get_piece_position(0))
-        # a peça 0 para na mesma casa da peça 4. a peça 4 volta para a origem
+
+    def test_28_move_one_piece_to_other_different_group(self):
         self.assertTrue(board.move_piece(0, 3))
         self.assertEqual((2, 11), board.get_piece_position(4))
+
+    def test_29_move_one_piece_to_other_same_group(self):
         self.assertTrue(board.move_piece(8, 6))
         self.assertTrue(board.move_piece(9, 6))
-        # duas peças iguais na mesma casa andam juntas
+        self.assertEqual((8, 5), board.get_piece_position(8))
+        self.assertEqual((8, 5), board.get_piece_position(8))
+
+    def test_30_move_piece_group(self):
         self.assertTrue(board.move_piece(8, 6))
         self.assertEqual((7, 0), board.get_piece_position(8))
         self.assertEqual((7, 0), board.get_piece_position(9))
-        # um bloco passa por outro. nada acontece
+
+    def test_31_move_one_block_through_other(self):
         self.assertTrue(board.move_piece(9, 8))
         self.assertTrue(board.move_piece(1, 6))
         self.assertTrue(board.move_piece(2, 6))
@@ -184,13 +191,14 @@ class BoardTest(unittest.TestCase):
         self.assertEqual((4, 6), board.get_piece_position(9))
         self.assertEqual((2, 6), board.get_piece_position(1))
         self.assertEqual((2, 6), board.get_piece_position(2))
-        # uma peça não pode passar de um bloco
+
+    def test_32_move_one_piece_through_block(self):
         self.assertTrue(board.move_piece(3, 6))
         self.assertEqual((4, 6), board.get_piece_position(8))
         self.assertEqual((4, 6), board.get_piece_position(9))
         self.assertEqual((5, 6), board.get_piece_position(3))
 
-    def help_27_move_one_piece_to_finish(self, piece):
+    def help_33_move_one_piece_to_finish(self, piece):
         board.move_piece(piece, 6)
         for iteration in range(100):
             board.move_piece(piece, 1)
@@ -200,10 +208,10 @@ class BoardTest(unittest.TestCase):
         self.assertTrue(False, 'piece moving loop took more than 100 iterations '
                                'to get to finish point. This should never happen')
 
-    def test_27_all_pieces_from_spawn_to_finish_one_step(self):
+    def test_33_all_pieces_from_spawn_to_finish_one_step(self):
         board.reset_board()
         for piece in range(16):
-            self.help_27_move_one_piece_to_finish(piece)
+            self.help_33_move_one_piece_to_finish(piece)
 
 
 if __name__ == '__main__':
