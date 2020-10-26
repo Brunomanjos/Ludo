@@ -1,5 +1,5 @@
 # Testes automatizados
-# Atualizado: 19/10/2020
+# Atualizado: 26/10/2020
 # autor: Bruno Messeder dos Anjos
 
 import inspect
@@ -20,10 +20,11 @@ def run_tests():
     test_classes = inspect.getmembers(
         tests, lambda member: inspect.isclass(member) and issubclass(member, unittest.TestCase))
 
-    for class_name, _ in test_classes:
-        print("Caso de Teste:", class_name)
+    suites = []
 
-    suites = [loader.loadTestsFromTestCase(test_case) for _, test_case in test_classes]
+    for class_name, test_case in test_classes:
+        suites.append(loader.loadTestsFromTestCase(test_case))
+        print("Caso de Teste:", class_name)
 
     unittest.TextTestRunner().run(unittest.TestSuite(suites))
 
