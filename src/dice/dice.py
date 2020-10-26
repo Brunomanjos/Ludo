@@ -6,7 +6,7 @@ __all__ = ['throw', 'get', 'clear']
 
 from random import randint
 
-dice_value = 6  # TODO change to None
+dice_value = None
 
 
 def throw():
