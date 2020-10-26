@@ -5,7 +5,6 @@
 import unittest
 
 import match
-import board
 
 
 class MatchTest(unittest.TestCase):
