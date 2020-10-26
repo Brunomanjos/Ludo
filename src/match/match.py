@@ -5,19 +5,20 @@
 from random import shuffle, randint
 
 import board
+import dice
 import player
 
-__all__ = ['new_match', 'make_move', 'current_player', 'player_groups', 'player_group', 'load_match',
+__all__ = ['new_match', 'play', 'current_player', 'player_groups', 'player_group', 'load_match',
            'close_match', 'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER', 'MATCH_ENDED',
-           'INVALID_STEPS', 'MATCH_IN_PROGRESS', 'INVALID_DATA']
+           'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN']
 
 MATCH_NOT_DEFINED = -1
 INVALID_PIECE = -2
 INVALID_PLAYER = -3
 MATCH_ENDED = -4
-INVALID_STEPS = -5
-MATCH_IN_PROGRESS = -6
-INVALID_DATA = -7
+MATCH_IN_PROGRESS = -5
+INVALID_DATA = -6
+DICE_NOT_THROWN = -7
 
 match = None
 
@@ -52,16 +53,15 @@ def new_match(p1, p2, p3, p4):
     return True
 
 
-def make_move(piece_id, steps):
+def play(piece_id):
     """
-    Move um peça
+    Faz uma jogada, movendo uma peça
 
     :param piece_id: id da peça
-    :param steps: quantas casas a peça vai se mover
     :return: True caso a jogada tenha sido efetuada.
      MATCH_NOT_DEFINED caso a partida não tenha sido definida
      INVALID_PIECE caso o id da peça seja seja inválido.
-     INVALID_STEPS caso o número de paços seja inválido.
+     DICE_NOT_THROWN caso o dado não tenha sido jogado nessa rodada.
      INVALID_PLAYER caso a peça não pertença ao jogador do turno atual.
      MATCH_ENDED caso a partida tenha terminado.
     """
@@ -69,8 +69,11 @@ def make_move(piece_id, steps):
         return MATCH_NOT_DEFINED
     elif piece_id < 0 or piece_id > 15:
         return INVALID_PIECE
-    elif steps < 1 or steps > 6:
-        return INVALID_STEPS
+
+    steps = dice.get()
+
+    if steps is None:
+        return DICE_NOT_THROWN
 
     current = current_player()
     if current == MATCH_ENDED:
@@ -92,6 +95,8 @@ def make_move(piece_id, steps):
         # muda o turno para o próximo jogador
         match['sequence'] = 0
         match['current_player'] = (match['current_player'] + 1) % 4
+
+    dice.clear()
 
 
 def current_player():
