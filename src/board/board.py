@@ -1,5 +1,5 @@
 # Módulo Board
-# Atualizado: 14/10/2020
+# Atualizado: 26/10/2020
 # autor: Bruno Messeder dos Anjos
 
 __all__ = ['END_OF_PATH', 'NOT_ON_PATH', 'INVALID_GROUP', 'NEGATIVE_STEPS', 'INVALID_PIECE_ID', 'EMPTY_POSITION',
@@ -372,6 +372,10 @@ def get_possible_move(piece_id, steps):
 
     original_position = get_piece_position(piece_id)
     piece_group = piece_id // 4
+
+    if original_position in get_spawn_positions(piece_group).values() and steps != 6:
+        return
+
     is_block = len(get_pieces_at(original_position)) == 2
     finish_pos = get_finish_position(piece_group)
 
