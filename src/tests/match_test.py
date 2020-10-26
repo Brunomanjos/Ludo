@@ -65,6 +65,10 @@ class MatchTest(unittest.TestCase):
         self.assertIsNone(match.make_move(piece, 6))
         self.assertNotEqual(player, match.current_player())
 
+    def test_15_close_match_ok(self):
+        self.assertIsInstance(match.close_match(), dict)
+        self.assertEqual(match.MATCH_NOT_DEFINED, match.make_move(0, 1))
+
 
 if __name__ == '__main__':
     unittest.main()
