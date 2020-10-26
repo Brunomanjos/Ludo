@@ -1,9 +1,10 @@
 # Teste Automatizado do módulo Match
-# Atualizado: 25/10/2020
+# Atualizado: 26/10/2020
 # autor: Bruno Messeder dos Anjos
 
 import unittest
 
+import dice
 import match
 
 
@@ -13,7 +14,7 @@ class MatchTest(unittest.TestCase):
         self.assertEqual(match.MATCH_NOT_DEFINED, match.current_player())
 
     def test_02_make_move_match_not_defined(self):
-        self.assertEqual(match.MATCH_NOT_DEFINED, match.make_move(1, 2))
+        self.assertEqual(match.MATCH_NOT_DEFINED, match.play(1))
 
     def test_03_player_groups_match_not_defined(self):
         self.assertEqual(match.MATCH_NOT_DEFINED, match.player_groups())
@@ -46,28 +47,25 @@ class MatchTest(unittest.TestCase):
         self.assertEqual(match.INVALID_PLAYER, match.player_group(-1))
         self.assertEqual(match.INVALID_PLAYER, match.player_group(4))
 
-    def test_12_make_move_invalid_piece(self):
-        self.assertEqual(match.INVALID_PIECE, match.make_move(-1, 2))
-        self.assertEqual(match.INVALID_PIECE, match.make_move(16, 2))
+    def test_12_play_invalid_piece(self):
+        self.assertEqual(match.INVALID_PIECE, match.play(-1))
+        self.assertEqual(match.INVALID_PIECE, match.play(16))
 
-    def test_13_make_move_invalid_steps(self):
-        self.assertEqual(match.INVALID_STEPS, match.make_move(0, 0))
-        self.assertEqual(match.INVALID_STEPS, match.make_move(1, 7))
+    def test_13_play_dice_not_thrown(self):
+        self.assertEqual(match.DICE_NOT_THROWN, match.play(0))
+        self.assertEqual(match.DICE_NOT_THROWN, match.play(1))
 
-    def test_14_make_move_ok(self):
+    def test_14_play_ok(self):
         player = match.current_player()
         group = match.player_group(player)
         piece = group * 4
-        self.assertIsNone(match.make_move(piece, 6))
-        self.assertEqual(player, match.current_player())
-        self.assertIsNone(match.make_move(piece, 6))
-        self.assertEqual(player, match.current_player())
-        self.assertIsNone(match.make_move(piece, 6))
-        self.assertNotEqual(player, match.current_player())
+
+        dice.throw()
+        self.assertIsNone(match.play(piece))
 
     def test_15_close_match_ok(self):
         self.assertIsInstance(match.close_match(), dict)
-        self.assertEqual(match.MATCH_NOT_DEFINED, match.make_move(0, 1))
+        self.assertEqual(match.MATCH_NOT_DEFINED, match.play(0))
 
 
 if __name__ == '__main__':

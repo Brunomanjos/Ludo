@@ -120,7 +120,7 @@ class BoardTest(unittest.TestCase):
     def test_18_possible_moves_ok(self):
         self.assertEqual({0: (1, 8), 1: (1, 8), 2: (2, 8), 3: (2, 8)}, board.get_possible_moves(0, 6))
         self.assertEqual({0: None, 1: None, 2: (1, 6), 3: (1, 6)}, board.get_possible_moves(0, 1))
-        self.assertEqual({4: (3, 8), 5: (2, 7), 6: (2, 8), 7: (6, 12)}, board.get_possible_moves(1, 2))
+        self.assertEqual({4: (3, 8), 5: (2, 7), 6: None, 7: (6, 12)}, board.get_possible_moves(1, 2))
 
     def test_19_possible_moves_invalid_group(self):
         self.assertEqual(board.INVALID_GROUP, board.get_possible_moves(-1, 1))
@@ -176,21 +176,22 @@ class BoardTest(unittest.TestCase):
         self.assertEqual((7, 0), board.get_piece_position(8))
         self.assertEqual((7, 0), board.get_piece_position(9))
         # um bloco passa por outro. nada acontece
-        self.assertTrue(board.move_piece(9, 6))
-        self.assertTrue(board.move_piece(1, 1))
-        self.assertTrue(board.move_piece(2, 1))
+        self.assertTrue(board.move_piece(9, 8))
         self.assertTrue(board.move_piece(1, 6))
-        self.assertEqual((6, 5), board.get_piece_position(8))
-        self.assertEqual((6, 5), board.get_piece_position(9))
-        self.assertEqual((4, 6), board.get_piece_position(1))
-        self.assertEqual((4, 6), board.get_piece_position(2))
+        self.assertTrue(board.move_piece(2, 6))
+        self.assertTrue(board.move_piece(1, 3))
+        self.assertEqual((4, 6), board.get_piece_position(8))
+        self.assertEqual((4, 6), board.get_piece_position(9))
+        self.assertEqual((2, 6), board.get_piece_position(1))
+        self.assertEqual((2, 6), board.get_piece_position(2))
         # uma peça não pode passar de um bloco
         self.assertTrue(board.move_piece(3, 6))
-        self.assertEqual((6, 5), board.get_piece_position(8))
-        self.assertEqual((6, 5), board.get_piece_position(9))
-        self.assertEqual((6, 4), board.get_piece_position(3))
+        self.assertEqual((4, 6), board.get_piece_position(8))
+        self.assertEqual((4, 6), board.get_piece_position(9))
+        self.assertEqual((5, 6), board.get_piece_position(3))
 
     def help_27_move_one_piece_to_finish(self, piece):
+        board.move_piece(piece, 6)
         for iteration in range(100):
             board.move_piece(piece, 1)
             if piece in board.get_pieces_at(board.get_finish_position(piece // 4)):
