@@ -1,10 +1,10 @@
 # Teste Automatizado do módulo Board
-# Atualizado: 26/10/2020
+# Atualizado: 28/10/2020
 # autor: Bruno Messeder dos Anjos
 
 import unittest
 
-import board.board as board  # import dessa forma para ter acesso a funções privadas para teste
+import board
 
 
 class BoardTest(unittest.TestCase):
@@ -32,53 +32,33 @@ class BoardTest(unittest.TestCase):
     def test_05_get_finish_points_ok(self):
         self.assertEqual([(7, 6), (6, 7), (8, 7), (7, 8)], board.get_finish_positions())
 
-    def test_06_is_finish_point_ok(self):
-        self.assertTrue(board.is_finish_position((7, 6)))
-        self.assertTrue(board.is_finish_position((7, 6), 0))
-        self.assertFalse(board.is_finish_position((7, 6), 1))
-        self.assertFalse(board.is_finish_position((0, 0)))
-        self.assertFalse(board.is_finish_position((-4, 100)))
-
-    def test_07_is_finish_point_invalid_group(self):
-        self.assertEqual(board.INVALID_GROUP, board.is_finish_position((1, 1), -1))
-        self.assertEqual(board.INVALID_GROUP, board.is_finish_position((1, 1), 4))
-
-    def test_08_overflow(self):
-        self.assertEqual((7, 1), board.get_next_position((7, 5), 0, 2))
-        self.assertEqual((1, 7), board.get_next_position((2, 7), 1, 6))
-
-    def test_09_get_piece_positions_ok(self):
+    def test_06_get_piece_positions_ok(self):
         self.assertEqual(board.get_spawn_positions(), board.get_pieces_positions())
         self.assertEqual(board.get_spawn_positions(1), board.get_pieces_positions(1))
 
-    def test_10_get_piece_positions_invalid_group(self):
+    def test_07_get_piece_positions_invalid_group(self):
         self.assertEqual(board.INVALID_GROUP, board.get_pieces_positions(-1))
         self.assertEqual(board.INVALID_GROUP, board.get_pieces_positions(4))
 
-    def test_11_get_piece_position_ok(self):
+    def test_08_get_piece_position_ok(self):
         self.assertEqual((12, 12), board.get_piece_position(15))
 
-    def test_12_get_piece_position_invalid_piece_id(self):
+    def test_09_get_piece_position_invalid_piece_id(self):
         self.assertEqual(board.INVALID_PIECE_ID, board.get_piece_position(-1))
         self.assertEqual(board.INVALID_PIECE_ID, board.get_piece_position(16))
 
-    def test_13_set_piece_pos_invalid_position(self):
-        self.assertEqual(2, board.set_piece_position(0, (5, 5)))
-        self.assertEqual(2, board.set_piece_position(0, (-1, -1)))
-        self.assertEqual(2, board.set_piece_position(0, (7, 7)))
-
-    def test_14_set_piece_pos_invalid_piece_id(self):
+    def test_10_set_piece_pos_invalid_piece_id(self):
         self.assertEqual(board.INVALID_PIECE_ID, board.set_piece_position(-1, (-1, -1)))
         self.assertEqual(board.INVALID_PIECE_ID, board.set_piece_position(16, (-1, -1)))
 
-    def test_15_set_piece_pos_invalid_position_for_group(self):
+    def test_11_set_piece_pos_invalid_position_for_group(self):
         # a posição (1, 7) é válida apenas para o grupo 1
         self.assertEqual(board.NOT_ON_PATH, board.set_piece_position(0, (1, 7)))
         self.assertEqual(board.NOT_ON_PATH, board.set_piece_position(1, (1, 7)))
         self.assertEqual(board.NOT_ON_PATH, board.set_piece_position(3, (1, 7)))
         self.assertIsNone(board.set_piece_position(5, (1, 7)))
 
-    def test_16_get_pieces_at(self):
+    def test_12_get_pieces_at(self):
         board.set_piece_position(7, (6, 10))
         board.set_piece_position(8, (6, 10))
         board.set_piece_position(0, (6, 1))
@@ -88,7 +68,7 @@ class BoardTest(unittest.TestCase):
         self.assertEqual([], board.get_pieces_at((2, 2)))
         self.assertEqual([0, 7, 8], board.get_pieces_at([(2, 2), (6, 10), (6, 1)]))
 
-    def test_17_get_possible_move_ok(self):
+    def test_13_get_possible_move_ok(self):
         board.set_piece_position(5, (0, 7))
         board.set_piece_position(0, (3, 6))
         # uma peça passando por outra peça
@@ -117,72 +97,50 @@ class BoardTest(unittest.TestCase):
         self.assertEqual((1, 8), board.get_possible_move(0, 6))
         self.assertIsNone(board.get_possible_move(0, 1))
 
-    def test_18_possible_moves_ok(self):
+    def test_14_possible_moves_ok(self):
         self.assertEqual({0: (1, 8), 1: (1, 8), 2: (2, 8), 3: (2, 8)}, board.get_possible_moves(0, 6))
         self.assertEqual({0: None, 1: None, 2: (1, 6), 3: (1, 6)}, board.get_possible_moves(0, 1))
         self.assertEqual({4: (3, 8), 5: (2, 7), 6: None, 7: (6, 12)}, board.get_possible_moves(1, 2))
 
-    def test_19_possible_moves_invalid_group(self):
+    def test_15_possible_moves_invalid_group(self):
         self.assertEqual(board.INVALID_GROUP, board.get_possible_moves(-1, 1))
         self.assertEqual(board.INVALID_GROUP, board.get_possible_moves(4, 1))
 
-    def test_20_possible_moves_negative_steps(self):
+    def test_16_possible_moves_negative_steps(self):
         self.assertEqual(board.NEGATIVE_STEPS, board.get_possible_moves(0, -1))
 
-    def test_21_get_path_ok(self):
-        self.assertEqual([(2, 2), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (5, 6)], board.get_path((2, 2), 0, 6))
-        self.assertEqual([(8, 0), (7, 0), (7, 1), (7, 2), (7, 3), (7, 4), (7, 5)], board.get_path((8, 0), 0, 6))
-        self.assertEqual([(8, 0), (7, 0), (6, 0), (6, 1), (6, 2), (6, 3), (6, 4)], board.get_path((8, 0), 1, 6))
-        self.assertEqual([(7, 1), (7, 2), (7, 3), (7, 4), (7, 5), (7, 6)], board.get_path((7, 1), 0, 5))
-        self.assertEqual([(7, 3), (7, 4), (7, 5), (7, 6), (7, 1)], board.get_path((7, 3), 0, 6))
-        self.assertEqual([(6, 1)], board.get_path((6, 1), 0, 0))
-
-    def test_22_get_path_invalid_position(self):
-        self.assertEqual(board.NOT_ON_PATH, board.get_path((0, 0), 0, 1))
-        self.assertEqual(board.NOT_ON_PATH, board.get_path((-1, -1), 0, 1))
-        self.assertEqual(board.NOT_ON_PATH, board.get_path((7, 7), 0, 1))
-        self.assertEqual(board.NOT_ON_PATH, board.get_path((7, 7), 0, 0))
-
-    def test_23_get_path_invalid_group(self):
-        self.assertEqual(board.INVALID_GROUP, board.get_path((6, 1), -1, 1))
-        self.assertEqual(board.INVALID_GROUP, board.get_path((6, 1), 4, 1))
-
-    def test_24_get_path_negative_steps(self):
-        self.assertEqual(board.NEGATIVE_STEPS, board.get_path((6, 1), 0, -1))
-        self.assertEqual(board.NEGATIVE_STEPS, board.get_path((6, 1), 0, -10))
-
-    def test_25_reset_board(self):
+    def test_17_reset_board(self):
         self.assertTrue(board.get_pieces_positions() != board.get_spawn_positions())
         board.reset_board()
         self.assertEqual(board.get_spawn_positions(), board.get_pieces_positions())
 
-    def test_26_move_piece_ok(self):
+    def test_18_move_piece_ok(self):
         self.assertTrue(board.move_piece(0, 6))
         self.assertEqual((5, 6), board.get_piece_position(0))
         self.assertTrue(board.move_piece(0, 10))
         self.assertEqual((3, 8), board.get_piece_position(0))
 
-    def test_27_move_one_piece_through_other(self):
+    def test_19_move_one_piece_through_other(self):
         self.assertTrue(board.move_piece(4, 6))
         self.assertEqual((6, 9), board.get_piece_position(4))
         self.assertEqual((3, 8), board.get_piece_position(0))
 
-    def test_28_move_one_piece_to_other_different_group(self):
+    def test_20_move_one_piece_to_other_different_group(self):
         self.assertTrue(board.move_piece(0, 3))
         self.assertEqual((2, 11), board.get_piece_position(4))
 
-    def test_29_move_one_piece_to_other_same_group(self):
+    def test_21_move_one_piece_to_other_same_group(self):
         self.assertTrue(board.move_piece(8, 6))
         self.assertTrue(board.move_piece(9, 6))
         self.assertEqual((8, 5), board.get_piece_position(8))
         self.assertEqual((8, 5), board.get_piece_position(8))
 
-    def test_30_move_piece_group(self):
+    def test_22_move_piece_group(self):
         self.assertTrue(board.move_piece(8, 6))
         self.assertEqual((7, 0), board.get_piece_position(8))
         self.assertEqual((7, 0), board.get_piece_position(9))
 
-    def test_31_move_one_block_through_other(self):
+    def test_23_move_one_block_through_other(self):
         self.assertTrue(board.move_piece(9, 8))
         self.assertTrue(board.move_piece(1, 6))
         self.assertTrue(board.move_piece(2, 6))
@@ -192,13 +150,13 @@ class BoardTest(unittest.TestCase):
         self.assertEqual((2, 6), board.get_piece_position(1))
         self.assertEqual((2, 6), board.get_piece_position(2))
 
-    def test_32_move_one_piece_through_block(self):
+    def test_24_move_one_piece_through_block(self):
         self.assertTrue(board.move_piece(3, 6))
         self.assertEqual((4, 6), board.get_piece_position(8))
         self.assertEqual((4, 6), board.get_piece_position(9))
         self.assertEqual((5, 6), board.get_piece_position(3))
 
-    def help_33_move_one_piece_to_finish(self, piece):
+    def help_25_move_one_piece_to_finish(self, piece):
         board.move_piece(piece, 6)
         for iteration in range(100):
             board.move_piece(piece, 1)
@@ -208,10 +166,10 @@ class BoardTest(unittest.TestCase):
         self.assertTrue(False, 'piece moving loop took more than 100 iterations '
                                'to get to finish point. This should never happen')
 
-    def test_33_all_pieces_from_spawn_to_finish_one_step(self):
+    def test_25_all_pieces_from_spawn_to_finish_one_step(self):
         board.reset_board()
         for piece in range(16):
-            self.help_33_move_one_piece_to_finish(piece)
+            self.help_25_move_one_piece_to_finish(piece)
 
 
 if __name__ == '__main__':
