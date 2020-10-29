@@ -1,5 +1,5 @@
 # Módulo Match
-# Atualizado: 24/10/2020
+# Atualizado: 28/10/2020
 # autor: Bruno Messeder dos Anjos
 
 from random import shuffle, randint
@@ -9,8 +9,8 @@ import dice
 import player
 
 __all__ = ['new_match', 'play', 'current_player', 'player_groups', 'player_group', 'load_match',
-           'close_match', 'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER', 'MATCH_ENDED',
-           'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN']
+           'close_match', 'can_play', 'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER',
+           'MATCH_ENDED', 'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN']
 
 MATCH_NOT_DEFINED = -1
 INVALID_PIECE = -2
@@ -19,6 +19,7 @@ MATCH_ENDED = -4
 MATCH_IN_PROGRESS = -5
 INVALID_DATA = -6
 DICE_NOT_THROWN = -7
+INVALID_STEPS = -8
 
 match = None
 
@@ -57,7 +58,7 @@ def play(piece_id):
     """
     Faz uma jogada, movendo uma peça
 
-    :param piece_id: id da peça
+    :param piece_id: id da peça, ou None, caso não haja jogada possível para o jogador atual.
     :return: True caso a jogada tenha sido efetuada.
      MATCH_NOT_DEFINED caso a partida não tenha sido definida
      INVALID_PIECE caso o id da peça seja seja inválido.
@@ -67,7 +68,7 @@ def play(piece_id):
     """
     if not match:
         return MATCH_NOT_DEFINED
-    elif piece_id < 0 or piece_id > 15:
+    elif piece_id is not None and (piece_id < 0 or piece_id > 15):
         return INVALID_PIECE
 
     steps = dice.get()
@@ -80,6 +81,15 @@ def play(piece_id):
         return MATCH_ENDED
 
     group = player_group(current)
+
+    if piece_id is None:
+        # Só pode ser None se não há jogada possível
+        if can_play(steps):
+            return INVALID_PIECE
+        next_player()
+        check_winner()
+        return
+
     if group != piece_id // 4:
         return INVALID_PLAYER
 
@@ -94,9 +104,50 @@ def play(piece_id):
     if steps < 6 or match['sequence'] >= 3:
         # muda o turno para o próximo jogador
         match['sequence'] = 0
-        match['current_player'] = (match['current_player'] + 1) % 4
+        next_player()
+
+    check_winner()
 
     dice.clear()
+
+
+def finished_players():
+    """
+    :return: lista dos jogadores que acabaram de jogar.
+    """
+    players = []
+
+    for player in range(4):
+        group = player_group(player)
+        pieces = board.get_pieces_at(board.get_finish_position(group))
+        if len(pieces) == 4:
+            players.append(player)
+
+    return players
+
+
+def next_player():
+    """
+    Passa a vez para o próximo jogador.
+    """
+    next = (current_player() + 1) % 4
+    finished = finished_players()
+    if len(finished) >= 3:
+        return  # o jogo acabou. 3 ou 4 jogadores acabaram
+
+    while next in finished:
+        next = (next + 1) % 4  # passa pelos jogadores até achar um que não tenha terminado de jogar.
+
+    match['current_player'] = next
+
+
+def check_winner():
+    """
+    Verifica se o jogo acabou. O jogo acaba quando todas as peças de três jogadores chegam ao centro do tabuleiro.
+    """
+
+    if len(finished_players()) >= 3:
+        match['current_plaer'] = None
 
 
 def current_player():
@@ -232,3 +283,37 @@ def close_match():
         return match
     finally:
         match = None
+
+
+def can_play(steps):
+    """
+    Verifica se o jogador atual pode fazer uma jogada caso tire um valor específico no dado.
+
+    :type steps: quantidade hipotética tirada no dado
+    :return: True caso o jogador possa fazer a jogada. False caso contrário.
+     MATCH_NOT_DEFINED caso a partida não tenha sido definida.
+     MATCH_ENDED caso a partida tenha acabado.
+     INVALID_STEPS caso steps seja 1 ou steps > 6
+    """
+    if not match:
+        return MATCH_NOT_DEFINED
+
+    current = match['current_player']
+
+    if current_player() is None:
+        return MATCH_ENDED
+    elif steps < 1 or steps > 6:
+        return INVALID_STEPS
+
+    moves = board.get_possible_moves(current, steps)
+    if not any(moves.values()):
+        return False
+
+    if steps == 6:
+        return True
+
+    piece_pos = board.get_spawn_positions()
+    spawn_pos = board.get_spawn_positions(player_group(current))
+
+    # retorna verdadeiro se existe pelo menos uma peça fora da origem com steps < 6
+    return piece_pos != spawn_pos
