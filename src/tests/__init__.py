@@ -1,6 +1,6 @@
 # Testes automatizados
 # Atualizado: 26/10/2020
-# autor: Bruno Messeder dos Anjos
+# Autor: Bruno Messeder dos Anjos
 
 from tests.board_test import *
 from tests.player_test import *

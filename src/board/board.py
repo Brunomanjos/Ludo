@@ -1,6 +1,6 @@
 # Módulo Board
 # Atualizado: 30/10/2020
-# autor: Bruno Messeder dos Anjos
+# Autor: Bruno Messeder dos Anjos
 
 __all__ = ['END_OF_PATH', 'NOT_ON_PATH', 'INVALID_GROUP', 'NEGATIVE_STEPS', 'INVALID_PIECE_ID',
            'EMPTY_POSITION', 'get_finish_positions', 'get_finish_position', 'get_pieces_positions',

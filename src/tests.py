@@ -1,6 +1,6 @@
 # Testes automatizados
 # Atualizado: 26/10/2020
-# autor: Bruno Messeder dos Anjos
+# Autor: Bruno Messeder dos Anjos
 
 import inspect
 import unittest

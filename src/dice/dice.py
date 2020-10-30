@@ -1,6 +1,6 @@
 # Módulo Dice
 # Atualizado: 26/10/2020
-# autor: Bruno Messeder dos Anjos
+# Autor: Bruno Messeder dos Anjos
 
 __all__ = ['throw', 'get', 'clear']
 
