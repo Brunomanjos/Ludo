@@ -59,7 +59,7 @@ def play(piece_id):
     Faz uma jogada, movendo uma peça
 
     :param piece_id: id da peça, ou None, caso não haja jogada possível para o jogador atual.
-    :return: True caso a jogada tenha sido efetuada.
+    :return: None caso a jogada tenha sido efetuada.
      MATCH_NOT_DEFINED caso a partida não tenha sido definida
      INVALID_PIECE caso o id da peça seja seja inválido.
      DICE_NOT_THROWN caso o dado não tenha sido jogado nessa rodada.
