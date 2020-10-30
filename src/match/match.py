@@ -1,16 +1,15 @@
 # Módulo Match
-# Atualizado: 28/10/2020
+# Atualizado: 30/10/2020
 # autor: Bruno Messeder dos Anjos
 
-from random import shuffle, randint
+from random import randint
 
 import board
 import dice
 import player
 
-__all__ = ['new_match', 'play', 'current_player', 'player_groups', 'player_group', 'load_match',
-           'close_match', 'can_play', 'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER',
-           'MATCH_ENDED', 'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN']
+__all__ = ['new_match', 'play', 'current_player', 'load_match', 'close_match', 'can_play', 'MATCH_NOT_DEFINED',
+           'INVALID_PIECE', 'INVALID_PLAYER', 'MATCH_ENDED', 'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN']
 
 MATCH_NOT_DEFINED = -1
 INVALID_PIECE = -2
@@ -38,15 +37,11 @@ def new_match(p1, p2, p3, p4):
     if match:
         return MATCH_IN_PROGRESS
 
-    groups = [0, 1, 2, 3]
-    shuffle(groups)
-
     player.set_players(p1, p2, p3, p4)
     board.reset_board()
 
     match = {
-        'current_player': randint(0, 3),  # id do jogador atual
-        'groups': groups,  # grupo das peças dos jogadores
+        'current_player': randint(0, 3),  # id do jogador atual. também é o grupo da peça do jogador atual
         'history': [],  # histórico da partida. Cada elemento é a jogada feita em uma rodada, da forma (peça, paços)
         'sequence': 0  # jogadas em sequência de um jogador. No máximo 3 antes de pular a vez
     }
@@ -76,25 +71,24 @@ def play(piece_id):
     if steps is None:
         return DICE_NOT_THROWN
 
-    current = current_player()
-    if current == MATCH_ENDED:
+    player = current_player()
+    if player == MATCH_ENDED:
         return MATCH_ENDED
-
-    group = player_group(current)
 
     if piece_id is None:
         # Só pode ser None se não há jogada possível
         if can_play(steps):
             return INVALID_PIECE
+        dice.clear()
         next_player()
         check_winner()
         return
 
-    if group != piece_id // 4:
+    if player != piece_id // 4:
         return INVALID_PLAYER
 
     piece_pos = board.get_piece_position(piece_id)
-    if piece_pos not in board.get_spawn_positions(group) or steps == 6:
+    if piece_pos not in board.get_spawn_positions(player) or steps == 6:
         # move a peça se ela não estiver na posição inicial ou,
         # caso esteja, o número de paços seja igual a 6
         board.move_piece(piece_id, steps)
@@ -118,8 +112,7 @@ def finished_players():
     players = []
 
     for player in range(4):
-        group = player_group(player)
-        pieces = board.get_pieces_at(board.get_finish_position(group))
+        pieces = board.get_pieces_at(board.get_finish_position(player))
         if len(pieces) == 4:
             players.append(player)
 
@@ -167,32 +160,6 @@ def current_player():
     return current
 
 
-def player_groups():
-    """
-    :return: Os grupos dos jogadores em uma lista (o índice da lista é o índice do jogador)
-     caso tenha uma partida em andamento. MATCH_NOT_DEFINED caso contrário.
-    """
-    if not match:
-        return MATCH_NOT_DEFINED
-
-    return match['groups'].copy()
-
-
-def player_group(player_index):
-    """
-    :param player_index: índice do jogador
-    :return: o grupo de um jogador caso tenha uma partida em andamento e o índice do jogador seja válido.
-     MATCH_NOT_DEFINED caso não tenha uma partida em andamento.
-     INVALID_PLAYER caso o índice do jogador seja inválido.
-    """
-    if not match:
-        return MATCH_NOT_DEFINED
-    elif player_index < 0 or player_index > 3:
-        return INVALID_PLAYER
-
-    return match['groups'][player_index]
-
-
 def load_match(match_data):
     """
     Carrega uma partida já começada.
@@ -225,23 +192,13 @@ def valid_data(data):
         return False
 
     # verifica a existência dos itens no dicionário
-    for item in ['current_player', 'groups', 'history', 'sequence']:
+    for item in ['current_player', 'history', 'sequence']:
         if item not in data:
             return False
 
     # verifica o jogador atual como 0, 1, 2, 3 ou None
     if data['current_player'] not in [0, 1, 2, 3, None]:
         return False
-
-    # verifica se os grupos das peças são uma lista com 4 elementos
-    groups = data['groups']
-    if not isinstance(groups, list) or len(groups) != 4:
-        return False
-
-    # verifica se cada elemento do grupo das peças é um inteiro entre 0 e 3
-    for value in groups:
-        if not isinstance(value, int) or not (0 <= value <= 3):
-            return False
 
     # verifica se o histórico é uma lista
     history = data['history']
@@ -298,14 +255,14 @@ def can_play(steps):
     if not match:
         return MATCH_NOT_DEFINED
 
-    current = match['current_player']
+    player = match['current_player']
 
-    if current_player() is None:
+    if player is None:
         return MATCH_ENDED
     elif steps < 1 or steps > 6:
         return INVALID_STEPS
 
-    moves = board.get_possible_moves(current, steps)
+    moves = board.get_possible_moves(player, steps)
     if not any(moves.values()):
         return False
 
@@ -313,7 +270,7 @@ def can_play(steps):
         return True
 
     piece_pos = board.get_spawn_positions()
-    spawn_pos = board.get_spawn_positions(player_group(current))
+    spawn_pos = board.get_spawn_positions(player)
 
     # retorna verdadeiro se existe pelo menos uma peça fora da origem com steps < 6
     return piece_pos != spawn_pos
