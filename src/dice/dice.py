@@ -1,5 +1,5 @@
-# Módulo Board
-# Atualizado: 14/10/2020
+# Módulo Dice
+# Atualizado: 26/10/2020
 # autor: Bruno Messeder dos Anjos
 
 __all__ = ['throw', 'get', 'clear']
