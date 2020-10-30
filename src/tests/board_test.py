@@ -1,5 +1,5 @@
 # Teste Automatizado do módulo Board
-# Atualizado: 28/10/2020
+# Atualizado: 30/10/2020
 # autor: Bruno Messeder dos Anjos
 
 import unittest
@@ -10,12 +10,12 @@ import board
 class BoardTest(unittest.TestCase):
 
     def test_01_get_spawn_points_ok(self):
-        self.assertEqual({4: (2, 11), 5: (2, 12), 6: (3, 11), 7: (3, 12)}, board.get_spawn_positions(1))
+        self.assertEqual({4: (1, 10), 5: (1, 13), 6: (4, 10), 7: (4, 13)}, board.get_spawn_positions(1))
 
-        self.assertEqual({0: (2, 2), 1: (2, 3), 2: (3, 2), 3: (3, 3),
-                          4: (2, 11), 5: (2, 12), 6: (3, 11), 7: (3, 12),
-                          8: (11, 2), 9: (11, 3), 10: (12, 2), 11: (12, 3),
-                          12: (11, 11), 13: (11, 12), 14: (12, 11), 15: (12, 12)
+        self.assertEqual({0: (1, 1), 1: (1, 4), 2: (4, 1), 3: (4, 4),
+                          4: (1, 10), 5: (1, 13), 6: (4, 10), 7: (4, 13),
+                          8: (10, 1), 9: (10, 4), 10: (13, 1), 11: (13, 4),
+                          12: (10, 10), 13: (10, 13), 14: (13, 10), 15: (13, 13)
                           }, board.get_spawn_positions())
 
     def test_02_get_spawn_points_invalid_group(self):
@@ -41,7 +41,7 @@ class BoardTest(unittest.TestCase):
         self.assertEqual(board.INVALID_GROUP, board.get_pieces_positions(4))
 
     def test_08_get_piece_position_ok(self):
-        self.assertEqual((12, 12), board.get_piece_position(15))
+        self.assertEqual((13, 13), board.get_piece_position(15))
 
     def test_09_get_piece_position_invalid_piece_id(self):
         self.assertEqual(board.INVALID_PIECE_ID, board.get_piece_position(-1))
@@ -91,15 +91,15 @@ class BoardTest(unittest.TestCase):
         # um bloco passando por uma peça, mesmo grupo
         board.set_piece_position(2, (2, 6))
         self.assertEqual((1, 8), board.get_possible_move(0, 6))
-        self.assertIsNone(board.get_possible_move(0, 1))
+        self.assertEqual((3, 6), board.get_possible_move(0, 1))
         # um bloco passando por outro bloco, mesmo grupo
         board.set_piece_position(3, (2, 6))
         self.assertEqual((1, 8), board.get_possible_move(0, 6))
-        self.assertIsNone(board.get_possible_move(0, 1))
+        self.assertEqual((3, 6), board.get_possible_move(0, 1))
 
     def test_14_possible_moves_ok(self):
         self.assertEqual({0: (1, 8), 1: (1, 8), 2: (2, 8), 3: (2, 8)}, board.get_possible_moves(0, 6))
-        self.assertEqual({0: None, 1: None, 2: (1, 6), 3: (1, 6)}, board.get_possible_moves(0, 1))
+        self.assertEqual({0: (3, 6), 1: (3, 6), 2: (1, 6), 3: (1, 6)}, board.get_possible_moves(0, 1))
         self.assertEqual({4: (3, 8), 5: (2, 7), 6: None, 7: (6, 12)}, board.get_possible_moves(1, 2))
 
     def test_15_possible_moves_invalid_group(self):
@@ -127,7 +127,7 @@ class BoardTest(unittest.TestCase):
 
     def test_20_move_one_piece_to_other_different_group(self):
         self.assertTrue(board.move_piece(0, 3))
-        self.assertEqual((2, 11), board.get_piece_position(4))
+        self.assertEqual((1, 10), board.get_piece_position(4))
 
     def test_21_move_one_piece_to_other_same_group(self):
         self.assertTrue(board.move_piece(8, 6))

@@ -1,5 +1,5 @@
 # Módulo Board
-# Atualizado: 26/10/2020
+# Atualizado: 30/10/2020
 # autor: Bruno Messeder dos Anjos
 
 __all__ = ['END_OF_PATH', 'NOT_ON_PATH', 'INVALID_GROUP', 'NEGATIVE_STEPS', 'INVALID_PIECE_ID',
@@ -380,7 +380,14 @@ def get_possible_move(piece_id, steps):
     is_block = len(get_pieces_at(original_position)) == 2
     finish_pos = get_finish_position(piece_group)
 
+    if original_position == finish_pos:
+        return  # caso a peça já esteja no final, ela não pode se mover
+
     path = get_path(original_position, piece_group, steps)
+
+    if path[-1] == original_position:
+        return  # caso a nova posição seja a posição inicial, significa que a peça não pode se mover
+
     # passa por todos as posições até a posição final para verificar a existência de blocos impedindo a passagem.
     for index, step in enumerate(path[1:]):
         if step == finish_pos:
@@ -405,8 +412,6 @@ def get_possible_move(piece_id, steps):
         # do bloco, retona a última posição do caminho
         return path[-1]
 
-    if path[-2] == original_position:
-        return  # caso a nova posição seja a posição inicial, significa que a peça não pode se mover
     return path[-2]  # caso contrário, retona a penúltima posição do caminho
 
 
@@ -519,16 +524,16 @@ def move_piece(piece_id, steps):
 
 board = {
     'spawn': [{
-        'from': [(2, 2), (2, 3), (3, 2), (3, 3)],
+        'from': [(1, 1), (1, 4), (4, 1), (4, 4)],
         'to': (6, 1)
     }, {
-        'from': [(2, 11), (2, 12), (3, 11), (3, 12)],
+        'from': [(1, 10), (1, 13), (4, 10), (4, 13)],
         'to': (1, 8)
     }, {
-        'from': [(11, 2), (11, 3), (12, 2), (12, 3)],
+        'from': [(10, 1), (10, 4), (13, 1), (13, 4)],
         'to': (13, 6)
     }, {
-        'from': [(11, 11), (11, 12), (12, 11), (12, 12)],
+        'from': [(10, 10), (10, 13), (13, 10), (13, 13)],
         'to': (8, 13)
     }],
     'main': [
