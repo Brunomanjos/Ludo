@@ -1,5 +1,5 @@
 # Módulo GUI
-# Atualizado: 30/10/2020
+# Atualizado: 01/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 import os
@@ -56,8 +56,6 @@ def handle_events():
             running = False
             pygame.quit()
             exit()
-        elif event.type == ACTIVEEVENT:
-            handle_active_event(event)
         handle_event(event)
 
 
@@ -67,12 +65,6 @@ def handle_event(event):
         if isinstance(sprite, EventSprite) and event.type in sprite.events:
             if sprite.handle_event(event):
                 event.consumed = True
-
-
-def handle_active_event(event):
-    # avoid a bug where the window becomes unresponsive after a alt-tab with mouse-1 being pressed
-    if event.state == 2 and pygame.mouse.get_pressed()[0]:
-        pygame.event.post(pygame.event.Event(MOUSEBUTTONUP, {'pos': (0, 0)}))
 
 
 def update_screen():

@@ -1,5 +1,5 @@
 # Sprites - Highlight de Movimentos
-# Atualizado: 30/10/2020
+# Atualizado: 01/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 import pygame
@@ -7,12 +7,10 @@ import pygame
 import board
 import dice
 import gui
-import match
 import gui.board_screen
+import match
 
 __all__ = ['MovementHighlight']
-
-colors = [(0, 150, 0), (150, 0, 0), (150, 150, 0), (0, 0, 150)]
 
 
 class MovementHighlight(pygame.sprite.Sprite):
@@ -23,7 +21,6 @@ class MovementHighlight(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=board_rect.center)
         self._anim_frame = 0
         self._alpha = 0
-        # TODO add selected field, that represents the selected piece to highlight it's possible move
 
     def update(self):
         self.image.fill((0, 0, 0, 0))
@@ -67,7 +64,7 @@ class MovementHighlight(pygame.sprite.Sprite):
 
         highlight = pygame.Surface((size, size))
         highlight.set_alpha(self._alpha)
-        highlight.fill(colors[player])  # TODO change colors[player] to piece.get_color(player)
+        highlight.fill(gui.sprite.colors[player])  # TODO change colors[player] to piece.get_color(player)
         rect = highlight.get_rect(topleft=gui.board_screen.get_pos(position, False))
 
         self.image.blit(highlight, rect)

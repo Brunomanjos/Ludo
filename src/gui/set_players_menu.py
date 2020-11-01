@@ -1,5 +1,5 @@
 # Módulo GUI - Menu de Definição dos Jogadores
-# Atualizado: 30/10/2020
+# Atualizado: 01/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 import pygame
@@ -124,21 +124,23 @@ def init():
 
     event = EventSprite([KEYDOWN], tab_event)
 
-    d_bg = Canvas((gui.WIDTH, gui.HEIGHT), True)
-    d_bg.image.fill((0, 0, 0, 147))
-    bg_rect = Rect(0, 0, 300, 160)
-    bg_rect.center = (gui.WIDTH / 2, gui.HEIGHT / 2)
-    d_bg.image.fill((255, 255, 255), bg_rect)
+    dialog_bg = Canvas((gui.WIDTH, gui.HEIGHT), True)
+    dialog_bg.image.fill((0, 0, 0, 147))
+    dialog_rect = Rect(0, 0, 300, 160)
+    dialog_rect.center = (gui.WIDTH / 2, gui.HEIGHT / 2)
+    dialog_bg.image.fill((255, 255, 255), dialog_rect)
 
-    d_bg.events = [KEYDOWN, KEYUP, MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN]
-    d_bg.handler = dialog_handler
+    dialog_bg.events = [KEYDOWN, KEYUP, MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN]
+    dialog_bg.handler = dialog_handler
 
-    d_b = Button((160, 50), 'Ok', hide_dialog, bg=(134, 184, 53), center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 30))
+    dialog_button = Button((160, 50), 'Ok', hide_dialog,
+                           bg=(134, 184, 53),
+                           center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 30))
 
-    d_l = Label((300, 40), 'Os nomes dos quatro\njogadores são obrigatórios!', text_align=LEFT,
-                center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 40))
+    dialog_label = Label((300, 40), 'Os nomes dos quatro\njogadores são obrigatórios!',
+                         text_align=LEFT, center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 40))
 
-    dialog = pygame.sprite.Group(d_bg, d_l, d_b)
+    dialog = pygame.sprite.Group(dialog_bg, dialog_label, dialog_button)
 
     menu = pygame.sprite.Group(bg, t1, t2, t3, t4, l1, l2, l3, l4, b1, b2, event)
 

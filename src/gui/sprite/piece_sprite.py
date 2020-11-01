@@ -1,5 +1,5 @@
 # Sprites - Peça
-# Atualizado: 30/10/2020
+# Atualizado: 01/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 import pygame
@@ -8,10 +8,10 @@ from pygame.locals import *
 
 from gui.sprite.event_sprite import EventSprite
 
-__all__ = ['PieceSprite']
+__all__ = ['PieceSprite', 'colors']
 
 radius = 25
-colors = [(0, 150, 0), (150, 0, 0), (150, 150, 0), (0, 0, 150)]
+colors = [(0, 150, 0), (150, 0, 0), (150, 150, 0), (0, 0, 150)]  # TODO remove this line AND __all__ 'colors'
 
 
 class PieceSprite(EventSprite):
@@ -23,9 +23,8 @@ class PieceSprite(EventSprite):
         self.fg = (255, 255, 255)
         self.font = pygame.font.SysFont('monospace', 24, 1)
         self.piece_id = piece_id
-        # TODO self.color = piece.get_color(piece)
         self.text = ''
-        self.color = colors[piece_id // 4]
+        self.color = colors[piece_id // 4]  # TODO self.color = piece.get_color(piece)
 
     def update(self):
         gfxdraw.aacircle(self.image, radius, radius, radius, self.color)

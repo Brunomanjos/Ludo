@@ -1,5 +1,5 @@
 # Módulo GUI - Tela do Tabuleiro
-# Atualizado: 30/10/2020
+# Atualizado: 01/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 
@@ -11,6 +11,7 @@ from pygame.locals import *
 import board
 import dice
 import match
+import player
 from gui.sprite import *
 
 
@@ -26,7 +27,6 @@ def get_pos(square, offset=True):
 def get_square(position):
     square_x = int((position[0] - offset_x - 2) / (square_size + 1))
     square_y = int((position[1] - offset_y - 2) / (square_size + 1))
-    print(square_y, square_x)
     return square_y, square_x
 
 
@@ -40,7 +40,7 @@ def update_piece_position(piece, animated):
     if new_position == piece_position:
         return
     elif animated:
-        screen.add(Transition(piece, new_position, 0.3, update_piece_text))
+        screen.add(Transition(piece, new_position, 0.3, on_animation_end))
     else:
         piece.rect.center = new_position
 
@@ -50,7 +50,9 @@ def update_pieces_positions(animated):
         update_piece_position(piece, animated)
 
 
-def update_piece_text():
+def on_animation_end():
+    global show_next_player
+
     for piece in pieces:
         pieces_at_same_pos = len(board.get_pieces_at(board.get_piece_position(piece.piece_id)))
         if pieces_at_same_pos == 1:
@@ -58,8 +60,14 @@ def update_piece_text():
         else:
             piece.text = str(pieces_at_same_pos)
 
+    if show_next_player:
+        show_dialog(f'Vez de {match.current_player_name()}')
+        show_next_player = False
+
 
 def check_play(piece):
+    global show_next_player
+
     played_square = get_square(piece.rect.center)
     dice_value = dice.get()
 
@@ -70,7 +78,13 @@ def check_play(piece):
     if possible_play != played_square:
         return
 
+    last_player = match.current_player()
+
     play_result = match.play(piece.piece_id)
+    highlight_player()
+
+    show_next_player = match.current_player() != last_player
+
     if play_result is None:
         show_dice_button()
 
@@ -90,59 +104,149 @@ def hide_dice_button():
 
 def throw_dice_action():
     dice.throw()
-    screen.remove(dice_button)
-    check_possible_moves()
-
-
-def check_possible_moves():
-    if not match.can_play(dice.get()):
-        print(f'Cannot play {dice.get()}: {match.current_player()}')
+    dice_value = dice.get()
+    if not match.can_play(dice_value):
         show_dice_button()
         match.play(None)
-        # TODO show skip player screen
+        highlight_player()
+        show_dialog(f'Tirou {dice_value} no dado\n\nNão há jogadas possíveis\n\nVez de {match.current_player_name()}')
+    else:
+        screen.remove(dice_button)
+        show_dialog(f'Tirou {dice_value} no dado')
 
 
-def drag_event_handler(event):
+def events_handler(event):
     if event.type == MOUSEBUTTONUP:
         for piece in selected_pieces:
             on_piece_move(piece)
         selected_pieces.clear()
     elif event.type == MOUSEBUTTONDOWN:
         selected_pieces.extend(get_pieces_at(event.pos))
-    else:
+    elif event.type == MOUSEMOTION:
         for piece in selected_pieces:
             piece.rect.center = event.pos
+    elif event.key == K_ESCAPE:
+        toggle_pause_menu()
 
 
 def get_pieces_at(pos):
     return [piece for piece in pieces if piece.collidepoint(pos)]
 
 
+def highlight_player():
+    highlight = match.current_player()
+    for index, player in enumerate(players):
+        if index == highlight:
+            player.fg = (125, 66, 235)
+        else:
+            player.fg = (0, 0, 0)
+
+
+def dialog_handler(event):
+    if event.consumed:
+        return
+    elif event.type == MOUSEBUTTONUP:
+        hide_dialog()
+    return True
+
+
+def show_dialog(text):
+    dialog.sprites()[1].text = text
+    screen.add(dialog)
+
+
+def hide_dialog():
+    screen.remove(dialog)
+
+
+def toggle_pause_menu():
+    if pause_menu in screen:
+        screen.remove(pause_menu)
+    else:
+        screen.add(pause_menu)
+
+
+def exit_game():
+    import gui
+    match.close_match()
+    gui.show_main_menu()
+
+
+def update_player_names():
+    for index, name in enumerate(player.get_players()):
+        players[index].text = name
+
+
 def init():
     import gui
-    global screen, pieces, offset_x, offset_y, square_size, dice_button
+    global screen, pieces, offset_x, offset_y, square_size, dice_button, dialog, pause_menu
 
+    # background
     bg = Canvas((gui.WIDTH, gui.HEIGHT))
-    bg.image.fill((90, 90, 90))
+    bg.image.fill((200, 200, 200))
 
+    # tabuleiro
     image = Image('Tabuleiro.png', (gui.HEIGHT, gui.HEIGHT))
     image.rect.center = (gui.WIDTH / 2, gui.HEIGHT / 2)
 
     offset_x = image.rect.left
     offset_y = image.rect.top
 
+    # peças
     pieces = [PieceSprite(piece) for piece in range(16)]
 
+    # highlight
     highlight = MovementHighlight(image.rect)
 
-    # TODO add pause menu
-
-    dice_button = Button((150, 50), 'Jogar Dado', throw_dice_action,
+    # botão
+    dice_button = Button((148, 50), 'Jogar Dado', throw_dice_action,
                          bg=(134, 184, 53), bottomright=(gui.WIDTH, gui.HEIGHT))
 
-    drag_event = EventSprite([MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION], drag_event_handler)
+    # eventos
+    events = EventSprite([MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, KEYDOWN], events_handler)
 
-    screen = pygame.sprite.Group(bg, image, highlight, pieces, dice_button, drag_event)
+    player.set_players('player 1', 'player 2', 'player 3', 'player 4')  # TODO remove this line
+
+    # nomes dos jogadores
+    names = player.get_players()
+    players.append(Label((offset_x, 40), names[0], midleft=(0, 3 * square_size)))
+    players.append(Label((offset_x, 40), names[1], topright=(gui.WIDTH, 3 * square_size)))
+    players.append(Label((offset_x, 40), names[2], bottomleft=(0, gui.HEIGHT - 3 * square_size)))
+    players.append(Label((offset_x, 40), names[3], bottomright=(gui.WIDTH, gui.HEIGHT - 3 * square_size)))
+
+    # diálogo de jogada
+    dialog_bg = Canvas((gui.WIDTH, gui.HEIGHT), True)
+    dialog_bg.image.fill((0, 0, 0, 147))
+    dialog_bg.events = [MOUSEBUTTONUP, MOUSEBUTTONDOWN, MOUSEMOTION]
+    dialog_bg.handler = dialog_handler
+
+    dialog_label = Label((270, 120), '', bg=(255, 255, 255), center=(gui.WIDTH / 2, gui.HEIGHT / 2))
+
+    dialog = pygame.sprite.Group(dialog_bg, dialog_label)
+
+    # menu de pause
+    menu_bg = Canvas((gui.WIDTH, gui.HEIGHT), True)
+    menu_bg.image.fill((0, 0, 0, 147))
+    menu_bg.events = [MOUSEBUTTONUP, MOUSEBUTTONDOWN, MOUSEMOTION]
+    menu_bg.handler = lambda e: True
+    menu_rect = Rect(0, 0, 300, 200)
+    menu_rect.center = (gui.WIDTH / 2, gui.HEIGHT / 2)
+    menu_bg.image.fill((255, 255, 255), menu_rect)
+
+    menu_continue = Button((200, 60), 'Continuar', toggle_pause_menu,
+                           bg=(255, 255, 255), fg=(134, 184, 53),
+                           center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 40))
+
+    menu_exit = Button((200, 60), 'Sair', exit_game,
+                       bg=(255, 255, 255), fg=(134, 184, 53),
+                       center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 40))
+
+    pause_menu = pygame.sprite.Group(menu_bg, menu_continue, menu_exit)
+
+    # TODO add 'player finished' dialog
+
+    screen = pygame.sprite.Group(bg, image, highlight, pieces,
+                                 dice_button, events, players)
 
 
 def get():
@@ -150,12 +254,16 @@ def get():
         init()
 
     update_pieces_positions(False)
-    print(square_size)
+    update_player_names()
+    highlight_player()
+
+    show_dialog(f'Vez de {match.current_player_name()}')
+    screen.remove(pause_menu)
 
     return screen
 
 
-screen, dice_button = None, None
-pieces = []
+screen, dice_button, dialog, pause_menu = None, None, None, None
+pieces, players, selected_pieces = [], [], []
 square_size, offset_x, offset_y = 59, 0, 0
-selected_pieces = []
+show_next_player = False

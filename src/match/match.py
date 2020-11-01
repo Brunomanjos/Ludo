@@ -1,15 +1,16 @@
 # Módulo Match
-# Atualizado: 30/10/2020
+# Atualizado: 01/11/2020
 # Autor: Bruno Messeder dos Anjos
 
-from random import randint
+from random import randint, shuffle
 
 import board
 import dice
 import player
 
-__all__ = ['new_match', 'play', 'current_player', 'load_match', 'close_match', 'can_play', 'MATCH_NOT_DEFINED',
-           'INVALID_PIECE', 'INVALID_PLAYER', 'MATCH_ENDED', 'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN']
+__all__ = ['new_match', 'play', 'current_player', 'load_match', 'close_match', 'can_play',
+           'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER', 'MATCH_ENDED',
+           'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN', 'current_player_name']
 
 MATCH_NOT_DEFINED = -1
 INVALID_PIECE = -2
@@ -37,7 +38,10 @@ def new_match(p1, p2, p3, p4):
     if match:
         return MATCH_IN_PROGRESS
 
-    player.set_players(p1, p2, p3, p4)
+    players = [p1, p2, p3, p4]
+    shuffle(players)
+
+    player.set_players(*players)
     board.reset_board()
 
     match = {
@@ -158,6 +162,23 @@ def current_player():
         return MATCH_ENDED
 
     return current
+
+
+def current_player_name():
+    """
+    :return: o nome do jogador atual, caso haja um partida em andamento.
+    MATCH_ENDED caso a partida tenha terminado.
+    MATCH_NOT_DEFINED caso a partida não tenha sido definida
+    """
+    if not match:
+        return MATCH_NOT_DEFINED
+
+    current = match['current_player']
+
+    if current is None:
+        return MATCH_ENDED
+
+    return player.get_player(current)
 
 
 def load_match(match_data):
