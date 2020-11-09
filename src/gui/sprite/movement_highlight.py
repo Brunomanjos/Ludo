@@ -21,6 +21,7 @@ class MovementHighlight(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=board_rect.center)
         self._anim_frame = 0
         self._alpha = 0
+        self.hovering = None
 
     def update(self):
         self.image.fill((0, 0, 0, 0))
@@ -37,6 +38,9 @@ class MovementHighlight(pygame.sprite.Sprite):
             return
 
         moves = board.get_possible_moves(player, dice_value)
+
+        if self.hovering in moves and moves[self.hovering] is not None:
+            moves = {self.hovering: moves[self.hovering]}
 
         self._anim_frame += 1
         if self._anim_frame > 1.5 * gui.FPS:

@@ -121,10 +121,17 @@ def events_handler(event):
             on_piece_move(piece)
         selected_pieces.clear()
     elif event.type == MOUSEBUTTONDOWN:
-        selected_pieces.extend(get_pieces_at(event.pos))
+        pieces_at = get_pieces_at(event.pos)
+        current = match.current_player()
+        selected_pieces.extend([piece for piece in pieces_at if piece.piece_id // 4 == current])
     elif event.type == MOUSEMOTION:
         for piece in selected_pieces:
             piece.rect.center = event.pos
+        for piece in pieces:
+            if piece.collidepoint(event.pos):
+                highlight.hovering = piece.piece_id
+                return
+        highlight.hovering = None
     elif event.key == K_ESCAPE:
         toggle_pause_menu()
 
@@ -179,7 +186,7 @@ def update_player_names():
 
 def init():
     import gui
-    global screen, pieces, offset_x, offset_y, square_size, dice_button, dialog, pause_menu
+    global screen, pieces, offset_x, offset_y, square_size, dice_button, dialog, pause_menu, highlight
 
     # background
     bg = Canvas((gui.WIDTH, gui.HEIGHT))
@@ -263,7 +270,7 @@ def get():
     return screen
 
 
-screen, dice_button, dialog, pause_menu = None, None, None, None
+screen, dice_button, dialog, pause_menu, highlight = None, None, None, None, None
 pieces, players, selected_pieces = [], [], []
 square_size, offset_x, offset_y = 59, 0, 0
 show_next_player = False
