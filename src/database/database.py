@@ -14,7 +14,6 @@ def init():
         cursor.close()
         connection.close()
         connection = connect(host='localhost', database='Modular', user='root', password='root')
-        raise ArithmeticError('no')
     except Error as e:
         print(f'Erro ao se conectar ao banco de dados: {e.msg}')
 
