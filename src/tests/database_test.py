@@ -1,13 +1,11 @@
 # Teste Automatizado do módulo Database
-# Atualizado: 09/11/2020
+# Atualizado: 12/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 import unittest
 
 import database
 
-
-# TODO document
 
 class DatabaseTest(unittest.TestCase):
 
@@ -19,9 +17,6 @@ class DatabaseTest(unittest.TestCase):
 
     def test_03_insert(self):
         self.assertTrue(database.execute("INSERT INTO TestTable VALUES (42, 'Bruno', false)"))
-
-    def test_04_fetch_one(self):
-        self.assertEqual((42, 'Bruno', 0), database.fetchone('SELECT * FROM TestTable'))
 
     def test_05_fetch_all(self):
         self.assertTrue(database.execute("INSERT INTO TestTable VALUES (37, 'João', true)"))

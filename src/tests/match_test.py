@@ -1,7 +1,7 @@
 # Teste Automatizado do módulo Match
-# Atualizado: 30/10/2020
+# Atualizado: 12/11/2020
 # Autor: Bruno Messeder dos Anjos
-
+import os
 import unittest
 
 import dice
@@ -17,7 +17,7 @@ class MatchTest(unittest.TestCase):
         self.assertEqual(match.MATCH_NOT_DEFINED, match.play(1))
 
     def test_03_close_match_not_defined(self):
-        self.assertIsNone(match.close_match())
+        self.assertFalse(match.close_match())
 
     def test_04_can_play_match_not_defined(self):
         self.assertEqual(match.MATCH_NOT_DEFINED, match.can_play(1))
@@ -54,7 +54,7 @@ class MatchTest(unittest.TestCase):
         self.assertTrue(match.can_play(7))
 
     def test_13_close_match_ok(self):
-        self.assertIsInstance(match.close_match(), dict)
+        self.assertTrue(match.close_match(False))
         self.assertEqual(match.MATCH_NOT_DEFINED, match.play(0))
 
 

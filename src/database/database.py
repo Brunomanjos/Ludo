@@ -1,15 +1,18 @@
 # Teste Automatizado do módulo Database
-# Atualizado: 11/11/2020
+# Atualizado: 12/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 from mysql.connector import connect, Error
 
-__all__ = ['execute', 'fetchall', 'fetchone', 'close']
+__all__ = ['execute', 'fetchall', 'close']
 
 connection = None
 
 
 def init():
+    """
+    Inicializa a conexão com o banco de dados.
+    """
     global connection
     try:
         connection = connect(host='localhost', user='root', password='root')
@@ -23,6 +26,13 @@ def init():
 
 
 def execute(sql):
+    """
+    Executa um comando sql.
+
+    :param sql: comando sql
+    :return: True caso o comando tenha sido executado sem erros.
+     False caso contrário.
+    """
     try:
         cursor = connection.cursor()
         cursor.execute(sql)
@@ -35,6 +45,13 @@ def execute(sql):
 
 
 def fetchall(sql):
+    """
+    Executa um comando sql com fetchall.
+
+    :param sql: comando sql
+    :return: o resultado de fetchall, caso o comando sql tenha sido executado sem erros.
+     None caso contrário.
+    """
     try:
         cursor = connection.cursor()
         cursor.execute(sql)
@@ -45,18 +62,10 @@ def fetchall(sql):
         print(f'Erro ao executar o comando \'{sql}\': {e.msg}')
 
 
-def fetchone(sql):
-    try:
-        cursor = connection.cursor()
-        cursor.execute(sql)
-        data = cursor.fetchone()
-        cursor.close()
-        return data
-    except Error as e:
-        print(f'Erro ao executar o comando \'{sql}\': {e.msg}')
-
-
 def close():
+    """
+    Termina a conexão com o bando de dados.
+    """
     global connection
     if connection:
         connection.close()
