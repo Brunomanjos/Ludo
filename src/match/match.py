@@ -3,10 +3,12 @@
 # Autor: Bruno Messeder dos Anjos
 
 from random import randint, shuffle
+from time import time
 from typing import Optional
 from xml.etree import ElementTree
-from xml.etree.ElementTree import Element, SubElement
+from xml.etree.ElementTree import Element, SubElement, parse
 from xml.dom.minidom import parseString
+import os
 
 import board
 import database
@@ -14,8 +16,8 @@ import dice
 import player
 
 __all__ = ['new_match', 'play', 'current_player', 'load_match', 'close_match', 'can_play',
-           'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER', 'MATCH_ENDED',
-           'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN', 'current_player_name']
+           'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER', 'MATCH_ENDED', 'MATCH_IN_PROGRESS',
+           'INVALID_DATA', 'DICE_NOT_THROWN', 'current_player_name', 'INVALID_ID', 'INVALID_STEPS', 'finished_players']
 
 MATCH_NOT_DEFINED = -1
 INVALID_PIECE = -2
@@ -25,6 +27,7 @@ MATCH_IN_PROGRESS = -5
 INVALID_DATA = -6
 DICE_NOT_THROWN = -7
 INVALID_STEPS = -8
+INVALID_ID = -9
 
 match: Optional[dict] = None
 
@@ -34,6 +37,7 @@ current_turn = 0
 def new_match(p1, p2, p3, p4):
     """
     Cria uma nova partida, caso nenhuma partida esteja em andamento
+
     :param p1: nome do primeiro jogador
     :param p2: nome do segundo jogador
     :param p3: nome do terceiro jogador
@@ -58,8 +62,7 @@ def new_match(p1, p2, p3, p4):
 
     current_turn = 0
 
-    database.execute('CREATE TABLE IF NOT EXISTS History(x int NOT NULL,'
-                     ' y int NOT NULL, piece_id int, turn int NOT NULL)')
+    database.execute('CREATE TABLE IF NOT EXISTS History(piece_id int, steps int NOT NULL, turn int NOT NULL)')
     database.execute('DELETE FROM History')
 
     return True
@@ -98,7 +101,7 @@ def play(piece_id):
         dice.clear()
         next_player()
         check_winner()
-        save_state(None)
+        save_move(None)
         return
 
     if player != piece_id // 4:
@@ -109,7 +112,7 @@ def play(piece_id):
         # move a peça se ela não estiver na posição inicial ou,
         # caso esteja, o número de paços seja igual a 6
         board.move_piece(piece_id, steps)
-        save_state(piece_id)
+        save_move(piece_id)
 
     match['sequence'] += 1
 
@@ -123,19 +126,17 @@ def play(piece_id):
     dice.clear()
 
 
-def save_state(piece_id):
+def save_move(piece_id):
     """
-
-    :return: TODO document
+    Salva a jogada atual no banco de dados
     """
 
     global current_turn
 
     if piece_id is not None:
-        y, x = board.get_piece_position(piece_id)
-        database.execute(f'INSERT INTO History VALUES ({x}, {y}, {piece_id}, {current_turn})')
+        database.execute(f'INSERT INTO History VALUES ({piece_id}, {dice.get()}, {current_turn})')
     else:
-        database.execute(f'INSERT INTO History VALUES (0, 0, NULL, {current_turn})')
+        database.execute(f'INSERT INTO History VALUES (NULL, 0, {current_turn})')
 
     current_turn += 1
 
@@ -212,107 +213,151 @@ def current_player_name():
     return player.get_player(current)
 
 
-# TODO change match_data to match_path
-def load_match(match_data):
+def load_match(match_id):
     """
     Carrega uma partida já começada.
-    :param match_data: dados da partida
+
+    :param match_id: o id da partida
     :return: True caso a partida tenha sido carregada.
      MATCH_IN_PROGRESS caso já tenha uma partida em andamento.
+     INVALID_ID caso o id da partida seja inválido.
      INVALID_DATA caso os dados da partida sejam inválidos.
     """
-    global match
+
+    global match, current_turn
 
     if match:
         return MATCH_IN_PROGRESS
 
-    if valid_data(match_data):
-        match = match_data
-        load_pieces_positions()
-        return True
+    path = os.path.join(os.environ['appdata'], f'.ludo\\match {match_id}.xml')
 
-    del match['history']
+    if not os.path.isfile(path):
+        return INVALID_ID
 
-    return INVALID_DATA
+    data = {}
 
+    root = parse(path).getroot()
+    players = root.find('players')
 
-def valid_data(data):
-    """
-    Valida os dados da partida para evitar erros.
-    :param data: dados da partida
-    :return: True caso os dados sejam válidos. False caso contrário.
-    """
+    if players is None:
+        return INVALID_DATA
 
-    # verifica se os dados estão em um dicionário
-    if not isinstance(data, dict):
-        return False
+    for player_element in players:
+        player.set_player(int(player_element.attrib['id']), player_element.text)
 
-    # verifica a existência dos itens no dicionário
-    for item in ['current_player', 'history', 'sequence']:
-        if item not in data:
-            return False
+    match_id_element = root.find('matchID')
+    if match_id_element is None:
+        return INVALID_DATA
 
-    # verifica o jogador atual como 0, 1, 2, 3 ou None
-    if data['current_player'] not in [0, 1, 2, 3, None]:
-        return False
+    data['id'] = int(match_id_element.text)
 
-    # verifica se o histórico é uma lista
-    history = data['history']
-    if not isinstance(history, list):
-        return False
+    current_player = root.find('currentPlayer')
 
-    # verifica se cada valor do histórico é uma tupla da forma (peça, paços)
-    for value in history:
-        if not isinstance(value, tuple) or len(value) != 2:
-            return False
+    if current_player is None:
+        return INVALID_DATA
 
-        piece, steps = value
-        if not isinstance(piece, int) or not (0 <= piece <= 15) \
-                or not isinstance(steps, int) or not (1 <= steps <= 6):
-            return False
+    data['current_player'] = int(current_player.text)
+
+    sequence = root.find('sequence')
+
+    if sequence is None:
+        return INVALID_DATA
+
+    data['sequence'] = int(sequence.text)
+
+    board.reset_board()
+    database.execute('CREATE TABLE IF NOT EXISTS History(piece_id int, steps int NOT NULL, turn int NOT NULL)')
+    database.execute('DELETE FROM History')
+
+    for turn, move in enumerate(root.find('history')):
+        piece_id = move.attrib['piece_id']
+        steps = move.attrib['steps']
+
+        current_turn = turn
+
+        if piece_id != 'None':
+            board.move_piece(int(piece_id), int(steps))
+            database.execute(f'INSERT INTO History VALUES ({piece_id}, {steps}, {turn})')
+        else:
+            database.execute(f'INSERT INTO History VALUES (NULL, {steps}, {turn})')
+
+    match = data
 
     return True
 
 
-def load_pieces_positions():
-    """
-    Move as peças de acordo com o histórico da partida carregada
-    """
-
-    board.reset_board()
-    for piece, steps in match['history']:
-        board.move_piece(piece, steps)
-
-
-def close_match():
+def close_match(save_match_data=True):
     """
     Fecha uma partida. A partina não pode ser continuada.
+
+    :param save_match_data: Se verdadeiro, salva a partida em um arquivo xml
     :return: True caso tenha uma partida em andamento.
      False caso contrário.
     """
     global match
-    if match:
+
+    if not match:
+        return False
+
+    if save_match_data:
         save_match()
-        match = None
-        return True
-    return False
+
+    board.reset_board()
+    dice.clear()
+    match = None
+    return True
 
 
 def save_match():
     """
-    :return: TODO document
+    Salva a partida atual em um arquivo xml
     """
-    history = database.fetchall('SELECT x, y, piece_id FROM History ORDER BY turn')
+    history = database.fetchall('SELECT piece_id, steps FROM History ORDER BY turn')
 
     root = Element('match')
+
+    if 'id' in match:
+        match_id = match['id']
+    else:
+        match_id = new_match_id()
+
+    SubElement(root, 'matchID').text = str(match_id)
     SubElement(root, 'currentPlayer').text = str(match['current_player'])
 
+    player_element = SubElement(root, 'players')
+    for index, name in enumerate(player.get_players()):
+        SubElement(player_element, 'player', {'id': str(index)}).text = name
+
+    SubElement(root, 'sequence').text = str(match['sequence'])
+
     history_element = SubElement(root, 'history')
-    for (x, y, piece_id) in history:
-        SubElement(history_element, 'move', {'x': str(x), 'y': str(y), 'piece_id': str(piece_id)})
+    for (piece_id, steps) in history:
+        SubElement(history_element, 'move', {'piece_id': str(piece_id), 'steps': str(steps)})
 
     data = parseString(ElementTree.tostring(root, 'utf-8')).toprettyxml(indent='  ')
-    # TODO save to new file
+
+    path = os.path.join(os.environ['appdata'], f'.ludo\\match {match_id}.xml')
+
+    with open(path, 'w') as file:
+        file.write(data)
+
+
+def new_match_id():
+    directory = os.path.join(os.environ['appdata'], '.ludo\\')
+
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
+    match_id = 1
+
+    file_name = 'match {}.xml'
+    path = directory + file_name.format(match_id)
+
+    while os.path.isfile(path):
+        match_id += 1
+        path = directory + file_name.format(match_id)
+
+    return match_id
 
 
 def can_play(steps):

@@ -1,20 +1,24 @@
 # Módulo GUI - Menu Principal
-# Atualizado: 30/10/2020
+# Atualizado: 12/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 import pygame
 
+import match
 from gui.sprite import *
 
 __all__ = ['get']
 
 
 def match_history_action():
-    print('history')  # TODO load from database
+    pass  # TODO show watch match menu
 
 
 def load_match_action():
-    print('load')  # TODO load from database
+    import gui
+    match.load_match(1)
+    gui.show_board()
+    # TODO show load match menu
 
 
 def init():

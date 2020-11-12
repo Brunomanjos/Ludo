@@ -1,5 +1,5 @@
 # Módulo GUI
-# Atualizado: 01/11/2020
+# Atualizado: 12/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 import os
@@ -11,6 +11,7 @@ import database
 import gui.board_screen
 import gui.main_menu
 import gui.set_players_menu
+import match
 from gui.sprite import *
 
 __all__ = ['loop', 'show_main_menu', 'show_set_players_menu', 'show_board', 'WIDTH', 'HEIGHT', 'FPS', 'quit']
@@ -71,6 +72,7 @@ def update_screen():
 def quit():
     global running
     running = False
+    match.close_match()
     database.close()
     pygame.quit()
     exit()

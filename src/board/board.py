@@ -318,7 +318,8 @@ def get_pieces_at(position_filter):
 
 def is_valid_position(position, piece_group=None):
     """
-    Verifica se uma posição é válida (pertence ao tabuleiro e pode ser conter uma peça do grupo piece_group)
+    Verifica se uma posição é válida (pertence ao tabuleiro e pode ser conter uma peça do grupo piece_group).
+
     :param position: posição a ser verificada
     :param piece_group: grupo da peça na posição position, ou None, para qualquer grupo. Supõe que o grupo é válido
     :return: True, caso o ponto seja válido. False caso contrário
@@ -400,6 +401,8 @@ def get_possible_move(piece_id, steps):
                 return path[-1]  # overflow com espaço para a peça
         elif len(get_pieces_at(step)) == 2 and not is_block:
             # se tiver um bloco impedindo a passagem de uma peça, a peça para antes do bloco
+            if index == 0:
+                return
             return path[index]
 
     # caso a peça não tenha sido parada por um bloco, overflow ou não tenha chegado no final do tabuleiro
@@ -411,6 +414,9 @@ def get_possible_move(piece_id, steps):
         # OU a peça em movimento seja um bloco e as peças na última posição do caminho sejam de um grupo diferente
         # do bloco, retona a última posição do caminho
         return path[-1]
+
+    if path[-2] == original_position:
+        return  # caso a penúltima posição seja a posição atual da peça, ela não pode se mover
 
     return path[-2]  # caso contrário, retona a penúltima posição do caminho
 

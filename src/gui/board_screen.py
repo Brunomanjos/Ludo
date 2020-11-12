@@ -1,9 +1,11 @@
 # Módulo GUI - Tela do Tabuleiro
-# Atualizado: 01/11/2020
+# Atualizado: 12/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 
 __all__ = ['get']
+
+from typing import Optional
 
 import pygame
 from pygame.locals import *
@@ -50,9 +52,7 @@ def update_pieces_positions(animated):
         update_piece_position(piece, animated)
 
 
-def on_animation_end():
-    global show_next_player
-
+def update_blocks():
     for piece in pieces:
         pieces_at_same_pos = len(board.get_pieces_at(board.get_piece_position(piece.piece_id)))
         if pieces_at_same_pos == 1:
@@ -60,9 +60,40 @@ def on_animation_end():
         else:
             piece.text = str(pieces_at_same_pos)
 
+
+def update_finished_players():
+    current_finished_players = set(match.finished_players())
+
+    if current_finished_players == finished_players:
+        return
+
+    for player_id in current_finished_players:
+        if player_id not in finished_players:
+            finished_players.append(player_id)
+            name = player.get_player(player_id)
+            place = len(finished_players)
+            show_dialog(f'{name}\nterminou em {place}º lugar')
+
+
+def on_animation_end():
+    global show_next_player
+
+    update_blocks()
+    update_finished_players()
+
     if show_next_player:
-        show_dialog(f'Vez de {match.current_player_name()}')
+        player_name = match.current_player_name()
+        if player_name == match.MATCH_ENDED:
+            on_match_end()
+            return
+        show_dialog(f'Vez de {player_name}')
         show_next_player = False
+
+
+def on_match_end():
+    import gui
+    # TODO show winners screen
+    gui.show_main_menu()
 
 
 def check_play(piece):
@@ -153,16 +184,23 @@ def dialog_handler(event):
     if event.consumed:
         return
     elif event.type == MOUSEBUTTONUP:
-        hide_dialog()
+        if dialog_queue:
+            dialog.sprites()[1].text = dialog_queue.pop(0)
+        else:
+            hide_dialog()
     return True
 
 
 def show_dialog(text):
-    dialog.sprites()[1].text = text
-    screen.add(dialog)
+    if dialog in screen:
+        dialog_queue.append(text)
+    else:
+        dialog.sprites()[1].text = text
+        screen.add(dialog)
 
 
 def hide_dialog():
+    dialog_queue.clear()
     screen.remove(dialog)
 
 
@@ -212,8 +250,6 @@ def init():
     # eventos
     events = EventSprite([MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, KEYDOWN], events_handler)
 
-    player.set_players('player 1', 'player 2', 'player 3', 'player 4')  # TODO remove this line
-
     # nomes dos jogadores
     names = player.get_players()
     players.append(Label((offset_x, 40), names[0], midleft=(0, 3 * square_size)))
@@ -250,8 +286,6 @@ def init():
 
     pause_menu = pygame.sprite.Group(menu_bg, menu_continue, menu_exit)
 
-    # TODO add 'player finished' dialog
-
     screen = pygame.sprite.Group(bg, image, highlight, pieces,
                                  dice_button, events, players)
 
@@ -263,6 +297,8 @@ def get():
     update_pieces_positions(False)
     update_player_names()
     highlight_player()
+    update_blocks()
+    show_dice_button()
 
     show_dialog(f'Vez de {match.current_player_name()}')
     screen.remove(pause_menu)
@@ -270,7 +306,7 @@ def get():
     return screen
 
 
-screen, dice_button, dialog, pause_menu, highlight = None, None, None, None, None
-pieces, players, selected_pieces = [], [], []
+screen, dialog, dice_button, pause_menu, highlight = None, None, None, None, None
+pieces, players, selected_pieces, finished_players, dialog_queue = [], [], [], [], []
 square_size, offset_x, offset_y = 59, 0, 0
 show_next_player = False

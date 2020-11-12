@@ -63,8 +63,8 @@ def new_match():
         show_dialog()
     else:
         match.close_match()
-    match.new_match(p1, p2, p3, p4)  # TODO put this on else branch
-    gui.show_board()
+        match.new_match(p1, p2, p3, p4)
+        gui.show_board()
 
 
 def show_dialog():
