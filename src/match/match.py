@@ -1,10 +1,15 @@
 # Módulo Match
-# Atualizado: 01/11/2020
+# Atualizado: 12/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 from random import randint, shuffle
+from typing import Optional
+from xml.etree import ElementTree
+from xml.etree.ElementTree import Element, SubElement
+from xml.dom.minidom import parseString
 
 import board
+import database
 import dice
 import player
 
@@ -21,7 +26,9 @@ INVALID_DATA = -6
 DICE_NOT_THROWN = -7
 INVALID_STEPS = -8
 
-match = None
+match: Optional[dict] = None
+
+current_turn = 0
 
 
 def new_match(p1, p2, p3, p4):
@@ -34,7 +41,7 @@ def new_match(p1, p2, p3, p4):
     :return: True caso a partida tenha sido criada.
      MATCH_IN_PROGRESS caso já tenha uma partida em andamento.
     """
-    global match
+    global match, current_turn
     if match:
         return MATCH_IN_PROGRESS
 
@@ -46,9 +53,14 @@ def new_match(p1, p2, p3, p4):
 
     match = {
         'current_player': randint(0, 3),  # id do jogador atual. também é o grupo da peça do jogador atual
-        'history': [],  # histórico da partida. Cada elemento é a jogada feita em uma rodada, da forma (peça, paços)
         'sequence': 0  # jogadas em sequência de um jogador. No máximo 3 antes de pular a vez
     }
+
+    current_turn = 0
+
+    database.execute('CREATE TABLE IF NOT EXISTS History(x int NOT NULL,'
+                     ' y int NOT NULL, piece_id int, turn int NOT NULL)')
+    database.execute('DELETE FROM History')
 
     return True
 
@@ -86,6 +98,7 @@ def play(piece_id):
         dice.clear()
         next_player()
         check_winner()
+        save_state(None)
         return
 
     if player != piece_id // 4:
@@ -96,6 +109,7 @@ def play(piece_id):
         # move a peça se ela não estiver na posição inicial ou,
         # caso esteja, o número de paços seja igual a 6
         board.move_piece(piece_id, steps)
+        save_state(piece_id)
 
     match['sequence'] += 1
 
@@ -107,6 +121,23 @@ def play(piece_id):
     check_winner()
 
     dice.clear()
+
+
+def save_state(piece_id):
+    """
+
+    :return: TODO document
+    """
+
+    global current_turn
+
+    if piece_id is not None:
+        y, x = board.get_piece_position(piece_id)
+        database.execute(f'INSERT INTO History VALUES ({x}, {y}, {piece_id}, {current_turn})')
+    else:
+        database.execute(f'INSERT INTO History VALUES (0, 0, NULL, {current_turn})')
+
+    current_turn += 1
 
 
 def finished_players():
@@ -144,7 +175,7 @@ def check_winner():
     """
 
     if len(finished_players()) >= 3:
-        match['current_plaer'] = None
+        match['current_player'] = None
 
 
 def current_player():
@@ -181,6 +212,7 @@ def current_player_name():
     return player.get_player(current)
 
 
+# TODO change match_data to match_path
 def load_match(match_data):
     """
     Carrega uma partida já começada.
@@ -198,6 +230,9 @@ def load_match(match_data):
         match = match_data
         load_pieces_positions()
         return True
+
+    del match['history']
+
     return INVALID_DATA
 
 
@@ -252,15 +287,32 @@ def load_pieces_positions():
 def close_match():
     """
     Fecha uma partida. A partina não pode ser continuada.
-    :return: os dados da partida caso tenha uma partida em andamento.
-     None caso contrário.
+    :return: True caso tenha uma partida em andamento.
+     False caso contrário.
     """
     global match
-
-    try:
-        return match
-    finally:
+    if match:
+        save_match()
         match = None
+        return True
+    return False
+
+
+def save_match():
+    """
+    :return: TODO document
+    """
+    history = database.fetchall('SELECT x, y, piece_id FROM History ORDER BY turn')
+
+    root = Element('match')
+    SubElement(root, 'currentPlayer').text = str(match['current_player'])
+
+    history_element = SubElement(root, 'history')
+    for (x, y, piece_id) in history:
+        SubElement(history_element, 'move', {'x': str(x), 'y': str(y), 'piece_id': str(piece_id)})
+
+    data = parseString(ElementTree.tostring(root, 'utf-8')).toprettyxml(indent='  ')
+    # TODO save to new file
 
 
 def can_play(steps):

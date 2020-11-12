@@ -7,6 +7,7 @@ import os
 import pygame
 from pygame.locals import *
 
+import database
 import gui.board_screen
 import gui.main_menu
 import gui.set_players_menu
@@ -20,25 +21,18 @@ FPS = 60
 
 BACKGROUND = (0, 0, 0)
 
-running = True
-sprites = None
-screen = None
-clock = pygame.time.Clock()
-
 pygame.init()
 pygame.font.init()
 pygame.key.set_repeat(400, 30)
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-
-def init():
-    global screen
-    if not screen:
-        screen = pygame.display.set_mode((WIDTH, HEIGHT))
+running = True
+sprites = None
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
 
 
 def loop():
-    init()
     while running:
         clock.tick(FPS)
         handle_events()
@@ -46,20 +40,17 @@ def loop():
 
 
 def handle_events():
-    global running
     for event in pygame.event.get():
-        if event.type == QUIT or (
-                event.type == KEYDOWN and
-                event.key == 285 and
-                event.mod & KMOD_LALT == KMOD_LALT
-        ):
-            running = False
-            pygame.quit()
-            exit()
         handle_event(event)
 
 
 def handle_event(event):
+    if event.type == QUIT or (
+            event.type == KEYDOWN and
+            event.key == 285 and
+            event.mod & KMOD_LALT == KMOD_LALT):
+        quit()
+
     event.consumed = False
     for sprite in sprites.sprites()[::-1]:
         if isinstance(sprite, EventSprite) and event.type in sprite.events:
@@ -80,21 +71,21 @@ def update_screen():
 def quit():
     global running
     running = False
+    database.close()
+    pygame.quit()
+    exit()
 
 
 def show_main_menu():
     global sprites
-    init()
     sprites = gui.main_menu.get()
 
 
 def show_set_players_menu():
     global sprites
-    init()
     sprites = gui.set_players_menu.get()
 
 
 def show_board():
     global sprites
-    init()
     sprites = gui.board_screen.get()
