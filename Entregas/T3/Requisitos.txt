@@ -14,7 +14,7 @@ Para jogar o dado, o jogador pressiona o botão com símbolo de dado.
 
 Para mover uma peça, o jogador seleciona a peça e depois sua nova posição.
 
-Para começar o jogo, os quatro jogam o dado até que saia um seis.
+Para começar o jogo, os quatro jogam o dado até que saia seis ou um.
 
 A pessoa que tirou seis começa movendo uma peça para a posição inicial e anda mais cinco casas.
 

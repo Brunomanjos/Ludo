@@ -91,15 +91,15 @@ class BoardTest(unittest.TestCase):
         # um bloco passando por uma peça, mesmo grupo
         board.set_piece_position(2, (2, 6))
         self.assertEqual((1, 8), board.get_possible_move(0, 6))
-        self.assertEqual((3, 6), board.get_possible_move(0, 1))
+        self.assertIsNone(board.get_possible_move(0, 1))
         # um bloco passando por outro bloco, mesmo grupo
         board.set_piece_position(3, (2, 6))
         self.assertEqual((1, 8), board.get_possible_move(0, 6))
-        self.assertEqual((3, 6), board.get_possible_move(0, 1))
+        self.assertIsNone(board.get_possible_move(0, 1))
 
     def test_14_possible_moves_ok(self):
         self.assertEqual({0: (1, 8), 1: (1, 8), 2: (2, 8), 3: (2, 8)}, board.get_possible_moves(0, 6))
-        self.assertEqual({0: (3, 6), 1: (3, 6), 2: (1, 6), 3: (1, 6)}, board.get_possible_moves(0, 1))
+        self.assertEqual({0: None, 1: None, 2: (1, 6), 3: (1, 6)}, board.get_possible_moves(0, 1))
         self.assertEqual({4: (3, 8), 5: (2, 7), 6: None, 7: (6, 12)}, board.get_possible_moves(1, 2))
 
     def test_15_possible_moves_invalid_group(self):

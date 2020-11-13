@@ -1,3 +1,8 @@
 autor: Bruno Messeder dos Anjos
 
+Requerimentos:
+	MySql (Disponível em https://dev.mysql.com/downloads/installer/ )
+
 Para testar o funcionamento de todos os módulos, execute 'python tests.py' no diretório '/src'.
+
+Para rodar uma versão inicial da interface gráfica, execute 'python main.py' no diretório '/src'.
