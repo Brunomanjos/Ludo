@@ -10,6 +10,9 @@ __all__ = ['Image']
 
 
 class Image(pygame.sprite.Sprite):
+    """
+    Sprite que representa uma imagem.
+    """
 
     def __init__(self, path, img_size=None, **pos):
         pygame.sprite.Sprite.__init__(self)

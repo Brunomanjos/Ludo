@@ -9,6 +9,10 @@ __all__ = ['EventSprite']
 
 
 class EventSprite(pygame.sprite.Sprite):
+    """
+    Classe base das outras classes desse diretório.
+    Simplifica o gerenciamento de eventos.
+    """
 
     def __init__(self, events, handler=None):
         pygame.sprite.Sprite.__init__(self)

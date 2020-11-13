@@ -16,6 +16,9 @@ def darker(color):
 
 
 class Button(EventSprite):
+    """
+    Sprite que representa um botão.
+    """
 
     def __init__(self, size, text, action, font=None, fg=(255, 255, 255), bg=(0, 0, 0), **pos):
         super().__init__([MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN])

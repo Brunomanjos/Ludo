@@ -343,6 +343,10 @@ def save_match():
 
 
 def new_match_id():
+    """
+    Gera um novo id da partida, baseado nos jogos salvos na memória.
+    :return: o novo id da partida
+    """
     directory = os.path.join(os.environ['appdata'], '.ludo\\')
 
     if not os.path.exists(directory):

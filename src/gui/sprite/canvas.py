@@ -10,6 +10,9 @@ __all__ = ['Canvas']
 
 
 class Canvas(EventSprite):
+    """
+    Sprite que representa uma tela desenhável (programaticamente).
+    """
 
     def __init__(self, size, alpha=False, **pos):
         super().__init__([])

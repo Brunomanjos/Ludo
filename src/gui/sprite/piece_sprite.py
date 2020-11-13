@@ -15,6 +15,9 @@ colors = [(0, 150, 0), (150, 0, 0), (150, 150, 0), (0, 0, 150)]  # TODO remove t
 
 
 class PieceSprite(EventSprite):
+    """
+    Sprite que representa uma peça do jogo.
+    """
 
     def __init__(self, piece_id, **pos):
         super().__init__([])

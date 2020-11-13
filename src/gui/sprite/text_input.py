@@ -12,6 +12,9 @@ __all__ = ['TextInput']
 
 
 class TextInput(EventSprite):
+    """
+    Sprite que representa uma entrada de texto.
+    """
 
     def __init__(self, size, action, bg=(255, 255, 255), fg=(0, 0, 0),
                  font=None, **pos):

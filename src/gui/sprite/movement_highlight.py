@@ -14,6 +14,9 @@ __all__ = ['MovementHighlight']
 
 
 class MovementHighlight(pygame.sprite.Sprite):
+    """
+    Sprite que representa o highlight das peças do jogador atual.
+    """
 
     def __init__(self, board_rect):
         pygame.sprite.Sprite.__init__(self)

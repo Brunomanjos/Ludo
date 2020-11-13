@@ -151,10 +151,14 @@ def events_handler(event):
         for piece in selected_pieces:
             on_piece_move(piece)
         selected_pieces.clear()
+
     elif event.type == MOUSEBUTTONDOWN:
         pieces_at = get_pieces_at(event.pos)
         current = match.current_player()
+        if get_square(event.pos) == board.get_finish_position(current):
+            return
         selected_pieces.extend([piece for piece in pieces_at if piece.piece_id // 4 == current])
+
     elif event.type == MOUSEMOTION:
         for piece in selected_pieces:
             piece.rect.center = event.pos
@@ -163,8 +167,12 @@ def events_handler(event):
                 highlight.hovering = piece.piece_id
                 return
         highlight.hovering = None
+
     elif event.key == K_ESCAPE:
         toggle_pause_menu()
+
+    elif event.key == K_SPACE and dice_button in screen:
+        dice_button.action()
 
 
 def get_pieces_at(pos):
@@ -188,6 +196,8 @@ def dialog_handler(event):
             dialog.sprites()[1].text = dialog_queue.pop(0)
         else:
             hide_dialog()
+    elif event.type == KEYDOWN and event.key == K_SPACE:
+        hide_dialog()
     return True
 
 
@@ -260,7 +270,7 @@ def init():
     # diálogo de jogada
     dialog_bg = Canvas((gui.WIDTH, gui.HEIGHT), True)
     dialog_bg.image.fill((0, 0, 0, 147))
-    dialog_bg.events = [MOUSEBUTTONUP, MOUSEBUTTONDOWN, MOUSEMOTION]
+    dialog_bg.events = [MOUSEBUTTONUP, MOUSEBUTTONDOWN, MOUSEMOTION, KEYDOWN]
     dialog_bg.handler = dialog_handler
 
     dialog_label = Label((270, 120), '', bg=(255, 255, 255), center=(gui.WIDTH / 2, gui.HEIGHT / 2))
@@ -291,6 +301,11 @@ def init():
 
 
 def get():
+    """
+    Inicializa a tela do tabuleiro e retorna os sprites presentes na tela.
+    """
+    global finished_players
+
     if not screen:
         init()
 
@@ -299,6 +314,7 @@ def get():
     highlight_player()
     update_blocks()
     show_dice_button()
+    finished_players = match.finished_players()
 
     show_dialog(f'Vez de {match.current_player_name()}')
     screen.remove(pause_menu)

@@ -12,6 +12,10 @@ RIGHT = 3
 
 
 class Label(pygame.sprite.Sprite):
+    """
+    Sprite que representa um texto.
+    O texto pode ter múltiplas linhas e pode ser alinhado no centro, na esquerda ou na direita.
+    """
 
     def __init__(self, size, text, font=None, bg=(0, 0, 0, 0), fg=(0, 0, 0), text_align=CENTER, **pos):
         pygame.sprite.Sprite.__init__(self)

@@ -146,6 +146,10 @@ def init():
 
 
 def get():
+    """
+    Inicializa a tela de definição dos jogadores e retorna os sprites presentes na tela.
+    """
+
     if not menu:
         init()
 

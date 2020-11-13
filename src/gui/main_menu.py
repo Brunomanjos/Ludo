@@ -45,7 +45,7 @@ def init():
 
     exit = Button((240, 80),
                   'Sair',
-                  gui.quit,
+                  gui.exit_gui,
                   bg=(134, 184, 53),
                   center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 180))
 
@@ -56,6 +56,9 @@ def init():
 
 
 def get():
+    """
+    Inicializa a tela do menu principal e retorna os sprites presentes na tela.
+    """
     if not menu:
         init()
     return menu

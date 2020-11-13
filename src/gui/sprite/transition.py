@@ -10,14 +10,17 @@ __all__ = ['Transition']
 
 
 class Transition(pygame.sprite.Sprite):
+    """
+    Animação que representa uma transição de um sprite para uma nova posição.
+    """
 
-    def __init__(self, piece, new_pos, duration, on_end=None):
+    def __init__(self, sprite, new_pos, duration, on_end=None):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((0, 0))
         self.rect = self.image.get_rect()
 
-        self.piece = piece
-        self.start_pos = piece.rect.center
+        self.sprite = sprite
+        self.start_pos = sprite.rect.center
         self.end_pos = new_pos
         self.duration = duration
         self.frames = duration * gui.FPS
@@ -35,10 +38,8 @@ class Transition(pygame.sprite.Sprite):
         if self._current_frame == self.frames and self._on_end:
             self._on_end()
         if self._current_frame > self.frames:
-            self.piece.rect.center = self.end_pos
+            self.sprite.rect.center = self.end_pos
             self.kill()
-
-        self.piece.selected = False
 
         x, y = self.start_pos
 
@@ -48,4 +49,4 @@ class Transition(pygame.sprite.Sprite):
         else:
             t = 4 * m ** 3
 
-        self.piece.rect.center = x + t * self.dx, y + t * self.dy
+        self.sprite.rect.center = x + t * self.dx, y + t * self.dy
