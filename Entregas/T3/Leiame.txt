@@ -1,7 +1,7 @@
 autor: Bruno Messeder dos Anjos
 
 Requerimentos:
-	MySql (Disponível em https://dev.mysql.com/downloads/installer/ )
+	MySql com usuário root e senha root (Disponível em https://dev.mysql.com/downloads/installer).
 
 Para testar o funcionamento de todos os módulos, execute 'python tests.py' no diretório '/src'.
 
