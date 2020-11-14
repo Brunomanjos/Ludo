@@ -17,3 +17,24 @@ Testes automatizados do módulo Board:
 
 Testes automatizados do módulo Player:
 	Horas trabalhadas: 1 Hora
+
+Implementação do módulo Dice:
+	Horas trabalhadas: 1 Hora
+
+Testes automatizados do módulo Dice:
+	Horas trabalhadas: 1 Hora
+
+Implementação do módulo Match:
+	Horas trabalhadas: 8 Horas
+
+Testes automatizados do módulo Match:
+	Horas trabalhadas: 2 Horas
+
+Implementação do módulo Database:
+	Horas trabalhadas: 2 Horas
+
+Testes automatizados do módulo Database:
+	Horas trabalhadas: 1 Hora
+
+Implementação do módulo GUI:
+	Horas trabalhadas: 20 Horas
