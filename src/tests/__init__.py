@@ -7,3 +7,4 @@ from tests.player_test import *
 from tests.match_test import *
 from tests.dice_test import *
 from tests.database_test import *
+from tests.piece_test import *
