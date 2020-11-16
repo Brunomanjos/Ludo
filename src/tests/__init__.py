@@ -1,5 +1,5 @@
 # Testes automatizados
-# Atualizado: 26/10/2020
+# Atualizado: 15/11/2020
 # Autor: Bruno Messeder dos Anjos & Alberto Augusto Caldeira Brant
 
 from tests.board_test import *
