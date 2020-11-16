@@ -16,7 +16,8 @@ def match_history_action():
 
 def load_match_action():
     import gui
-    match.load_match(1)
+    if match.load_match(1) is not True:
+        return
     gui.show_board()
     # TODO show load match menu
 
