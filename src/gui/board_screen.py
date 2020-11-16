@@ -13,6 +13,7 @@ from pygame.locals import *
 import board
 import dice
 import match
+import piece
 import player
 from gui.sprite import *
 
@@ -183,9 +184,9 @@ def highlight_player():
     highlight = match.current_player()
     for index, player in enumerate(players):
         if index == highlight:
-            player.fg = (125, 66, 235)
+            player.bg = piece.corPeca(index * 4)
         else:
-            player.fg = (0, 0, 0)
+            player.bg = (0, 0, 0, 0)
 
 
 def dialog_handler(event):
@@ -262,10 +263,12 @@ def init():
 
     # nomes dos jogadores
     names = player.get_players()
-    players.append(Label((offset_x, 40), names[0], midleft=(0, 3 * square_size)))
-    players.append(Label((offset_x, 40), names[1], topright=(gui.WIDTH, 3 * square_size)))
-    players.append(Label((offset_x, 40), names[2], bottomleft=(0, gui.HEIGHT - 3 * square_size)))
-    players.append(Label((offset_x, 40), names[3], bottomright=(gui.WIDTH, gui.HEIGHT - 3 * square_size)))
+    label_y = get_pos((3, 0))[1]
+    players.append(Label((offset_x, 60), names[0], midleft=(0, label_y)))
+    players.append(Label((offset_x, 60), names[1], midright=(gui.WIDTH, label_y)))
+    label_y = get_pos((12, 0))[1]
+    players.append(Label((offset_x, 60), names[2], midright=(gui.WIDTH, label_y)))
+    players.append(Label((offset_x, 60), names[3], midleft=(0, label_y)))
 
     # diálogo de jogada
     dialog_bg = Canvas((gui.WIDTH, gui.HEIGHT), True)

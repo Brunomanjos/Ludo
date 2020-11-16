@@ -14,8 +14,8 @@ class BoardTest(unittest.TestCase):
 
         self.assertEqual({0: (1, 1), 1: (1, 4), 2: (4, 1), 3: (4, 4),
                           4: (1, 10), 5: (1, 13), 6: (4, 10), 7: (4, 13),
-                          8: (10, 1), 9: (10, 4), 10: (13, 1), 11: (13, 4),
-                          12: (10, 10), 13: (10, 13), 14: (13, 10), 15: (13, 13)
+                          8: (10, 10), 9: (10, 13), 10: (13, 10), 11: (13, 13),
+                          12: (10, 1), 13: (10, 4), 14: (13, 1), 15: (13, 4)
                           }, board.get_spawn_positions())
 
     def test_02_get_spawn_points_invalid_group(self):
@@ -23,14 +23,14 @@ class BoardTest(unittest.TestCase):
         self.assertEqual(board.INVALID_GROUP, board.get_spawn_positions(4))
 
     def test_03_get_finish_point_ok(self):
-        self.assertEqual((8, 7), board.get_finish_position(2))
+        self.assertEqual((8, 7), board.get_finish_position(3))
 
     def test_04_get_finish_point_invalid_group(self):
         self.assertEqual(board.INVALID_GROUP, board.get_finish_position(-1))
         self.assertEqual(board.INVALID_GROUP, board.get_finish_position(4))
 
     def test_05_get_finish_points_ok(self):
-        self.assertEqual([(7, 6), (6, 7), (8, 7), (7, 8)], board.get_finish_positions())
+        self.assertEqual([(7, 6), (6, 7), (7, 8), (8, 7)], board.get_finish_positions())
 
     def test_06_get_piece_positions_ok(self):
         self.assertEqual(board.get_spawn_positions(), board.get_pieces_positions())
@@ -41,7 +41,7 @@ class BoardTest(unittest.TestCase):
         self.assertEqual(board.INVALID_GROUP, board.get_pieces_positions(4))
 
     def test_08_get_piece_position_ok(self):
-        self.assertEqual((13, 13), board.get_piece_position(15))
+        self.assertEqual((13, 13), board.get_piece_position(11))
 
     def test_09_get_piece_position_invalid_piece_id(self):
         self.assertEqual(board.INVALID_PIECE_ID, board.get_piece_position(-1))
@@ -132,28 +132,28 @@ class BoardTest(unittest.TestCase):
     def test_21_move_one_piece_to_other_same_group(self):
         self.assertTrue(board.move_piece(8, 6))
         self.assertTrue(board.move_piece(9, 6))
-        self.assertEqual((8, 5), board.get_piece_position(8))
-        self.assertEqual((8, 5), board.get_piece_position(8))
+        self.assertEqual((9, 8), board.get_piece_position(8))
+        self.assertEqual((9, 8), board.get_piece_position(9))
 
     def test_22_move_piece_group(self):
         self.assertTrue(board.move_piece(8, 6))
-        self.assertEqual((7, 0), board.get_piece_position(8))
-        self.assertEqual((7, 0), board.get_piece_position(9))
+        self.assertEqual((14, 7), board.get_piece_position(8))
+        self.assertEqual((14, 7), board.get_piece_position(9))
 
     def test_23_move_one_block_through_other(self):
         self.assertTrue(board.move_piece(9, 8))
         self.assertTrue(board.move_piece(1, 6))
         self.assertTrue(board.move_piece(2, 6))
         self.assertTrue(board.move_piece(1, 3))
-        self.assertEqual((4, 6), board.get_piece_position(8))
-        self.assertEqual((4, 6), board.get_piece_position(9))
+        self.assertEqual((8, 4), board.get_piece_position(8))
+        self.assertEqual((8, 4), board.get_piece_position(9))
         self.assertEqual((2, 6), board.get_piece_position(1))
         self.assertEqual((2, 6), board.get_piece_position(2))
 
     def test_24_move_one_piece_through_block(self):
         self.assertTrue(board.move_piece(3, 6))
-        self.assertEqual((4, 6), board.get_piece_position(8))
-        self.assertEqual((4, 6), board.get_piece_position(9))
+        self.assertEqual((8, 4), board.get_piece_position(8))
+        self.assertEqual((8, 4), board.get_piece_position(9))
         self.assertEqual((5, 6), board.get_piece_position(3))
 
     def help_25_move_one_piece_to_finish(self, piece):

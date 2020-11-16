@@ -12,6 +12,8 @@ import match
 
 __all__ = ['MovementHighlight']
 
+import piece
+
 
 class MovementHighlight(pygame.sprite.Sprite):
     """
@@ -71,7 +73,7 @@ class MovementHighlight(pygame.sprite.Sprite):
 
         highlight = pygame.Surface((size, size))
         highlight.set_alpha(self._alpha)
-        highlight.fill(gui.sprite.colors[player])  # TODO change colors[player] to piece.get_color(player)
+        highlight.fill(piece.corPeca(player * 4))
         rect = highlight.get_rect(topleft=gui.board_screen.get_pos(position, False))
 
         self.image.blit(highlight, rect)

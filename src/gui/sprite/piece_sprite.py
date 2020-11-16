@@ -6,12 +6,12 @@ import pygame
 from pygame import gfxdraw
 from pygame.locals import *
 
+import piece
 from gui.sprite.event_sprite import EventSprite
 
-__all__ = ['PieceSprite', 'colors']
+__all__ = ['PieceSprite']
 
 radius = 25
-colors = [(0, 150, 0), (150, 0, 0), (150, 150, 0), (0, 0, 150)]  # TODO remove this line AND __all__ 'colors'
 
 
 class PieceSprite(EventSprite):
@@ -27,7 +27,7 @@ class PieceSprite(EventSprite):
         self.font = pygame.font.SysFont('monospace', 24, 1)
         self.piece_id = piece_id
         self.text = ''
-        self.color = colors[piece_id // 4]  # TODO self.color = piece.get_color(piece)
+        self.color = piece.corPeca(piece_id)
 
     def update(self):
         gfxdraw.aacircle(self.image, radius, radius, radius, self.color)
