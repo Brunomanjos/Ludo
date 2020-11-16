@@ -43,15 +43,15 @@ class PieceTest(unittest.TestCase):
         self.assertEqual((150, 0, 0), piece.corPeca(6))
         self.assertEqual((150, 0, 0), piece.corPeca(7))
 
-        self.assertEqual((150, 150, 0), piece.corPeca(8))
-        self.assertEqual((150, 150, 0), piece.corPeca(9))
-        self.assertEqual((150, 150, 0), piece.corPeca(10))
-        self.assertEqual((150, 150, 0), piece.corPeca(11))
+        self.assertEqual((0, 0, 150), piece.corPeca(8))
+        self.assertEqual((0, 0, 150), piece.corPeca(9))
+        self.assertEqual((0, 0, 150), piece.corPeca(10))
+        self.assertEqual((0, 0, 150), piece.corPeca(11))
 
-        self.assertEqual((0, 0, 150), piece.corPeca(12))
-        self.assertEqual((0, 0, 150), piece.corPeca(13))
-        self.assertEqual((0, 0, 150), piece.corPeca(14))
-        self.assertEqual((0, 0, 150), piece.corPeca(15))
+        self.assertEqual((150, 150, 0), piece.corPeca(12))
+        self.assertEqual((150, 150, 0), piece.corPeca(13))
+        self.assertEqual((150, 150, 0), piece.corPeca(14))
+        self.assertEqual((150, 150, 0), piece.corPeca(15))
 
 
 if __name__ == '__main__':
