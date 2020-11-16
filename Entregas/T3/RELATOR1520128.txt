@@ -4,5 +4,5 @@ Requisitos do módulo Piece e testes:
 	Horas trabalhadas: 2 Horas
 	
 Estudos sobre Python/Modularização/Classes/PyGame e GUI:
-	Horas trabalhadas: 5 Hora
+	Horas trabalhadas: 5 Horas
 
