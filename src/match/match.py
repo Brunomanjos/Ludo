@@ -13,6 +13,7 @@ import os
 import board
 import database
 import dice
+import piece
 import player
 
 __all__ = ['new_match', 'play', 'current_player', 'load_match', 'close_match', 'can_play',
@@ -82,7 +83,7 @@ def play(piece_id):
     """
     if not match:
         return MATCH_NOT_DEFINED
-    elif piece_id is not None and (piece_id < 0 or piece_id > 15):
+    elif piece_id is not None and piece.buscaGrupo(piece_id) == -1:
         return INVALID_PIECE
 
     steps = dice.get()
@@ -104,7 +105,7 @@ def play(piece_id):
         save_move(None)
         return
 
-    if player != piece_id // 4:
+    if player != piece.buscaGrupo(piece_id):
         return INVALID_PLAYER
 
     piece_pos = board.get_piece_position(piece_id)

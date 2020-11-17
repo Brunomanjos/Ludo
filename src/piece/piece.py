@@ -27,14 +27,16 @@ def buscaGrupo(idPeca):
     # Retorna o numero do grupo que tal peça pertence
     # Se retornar -1 o id da peça não é coerente
 
+    if idPeca <= -1:
+        return -1
     if 0 <= idPeca <= 3:
-        return 1
+        return 0
     elif idPeca <= 7:
-        return 2
+        return 1
     elif idPeca <= 11:
-        return 3
+        return 2
     elif idPeca <= 15:
-        return 4
+        return 3
     else:
         return -1
 

@@ -172,7 +172,7 @@ def events_handler(event):
     elif event.key == K_ESCAPE:
         toggle_pause_menu()
 
-    elif event.key == K_SPACE and dice_button in screen:
+    elif event.key == K_SPACE and dice_button in screen and not event.consumed and pause_menu not in screen:
         dice_button.action()
 
 
@@ -197,7 +197,7 @@ def dialog_handler(event):
             dialog.sprites()[1].text = dialog_queue.pop(0)
         else:
             hide_dialog()
-    elif event.type == KEYDOWN and event.key == K_SPACE:
+    elif event.type == KEYDOWN and event.key == K_SPACE and pause_menu not in screen:
         hide_dialog()
     return True
 

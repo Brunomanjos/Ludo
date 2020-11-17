@@ -7,6 +7,8 @@ __all__ = ['END_OF_PATH', 'NOT_ON_PATH', 'INVALID_GROUP', 'NEGATIVE_STEPS', 'INV
            'get_piece_position', 'reset_board', 'get_pieces_at', 'get_possible_move', 'get_possible_moves',
            'move_piece', 'get_spawn_positions', 'set_piece_position']
 
+import piece
+
 END_OF_PATH = 1
 NOT_ON_PATH = 2
 INVALID_GROUP = 3
@@ -265,7 +267,7 @@ def move_piece_to_spawn(piece_id):
     :param piece_id: id da peça
     :return: None, caso piece_id seja válido. INVALID_PIECE_ID, caso contrário
     """
-    if piece_id < 0 or piece_id > 15:
+    if piece.buscaGrupo(piece_id) == -1:
         return INVALID_PIECE_ID
 
     spawn = get_spawn_positions()[piece_id]
@@ -283,13 +285,11 @@ def get_pieces_positions(piece_group=None):
     if piece_group and (piece_group < 0 or piece_group > 3):
         return INVALID_GROUP
 
-    positions = pieces.copy()
     if piece_group is not None:
-        start_id = 4 * piece_group
-        end_id = start_id + 4
-        positions = {piece_id: position for piece_id, position in positions.items() if start_id <= piece_id < end_id}
-
-    return positions
+        piece_ids = piece.todasPecas(piece_group)
+        return {piece_id: pieces[piece_id] for piece_id in pieces if piece_id in piece_ids}
+    else:
+        return pieces.copy()
 
 
 def get_piece_position(piece_id):
@@ -297,7 +297,7 @@ def get_piece_position(piece_id):
     :param piece_id: id da peça
     :return: posição da peça, caso piece_id seja válido. INVALID_PIECE_ID, caso contrário.
     """
-    if piece_id < 0 or piece_id > 15:
+    if piece.buscaGrupo(piece_id) == -1:
         return INVALID_PIECE_ID
     return pieces[piece_id]
 
@@ -344,10 +344,10 @@ def set_piece_position(piece_id, new_position):
      NOT_ON_PATH, caso a posição não seja válida para a peça.
     """
 
-    if piece_id < 0 or piece_id > 15:
+    if piece.buscaGrupo(piece_id) == -1:
         return INVALID_PIECE_ID
 
-    if not is_valid_position(new_position, piece_id // 4):
+    if not is_valid_position(new_position, piece.buscaGrupo(piece_id)):
         return NOT_ON_PATH
 
     pieces[piece_id] = new_position
@@ -365,7 +365,7 @@ def get_possible_move(piece_id, steps):
      NEGATIVE_STEPS, caso steps seja negativo.
      None, caso a peça não possa ser movida.
     """
-    if piece_id < 0 or piece_id > 15:
+    if piece.buscaGrupo(piece_id) == -1:
         return INVALID_PIECE_ID
     elif steps < 0:
         return NEGATIVE_STEPS
@@ -373,7 +373,7 @@ def get_possible_move(piece_id, steps):
         return get_piece_position(piece_id)
 
     original_position = get_piece_position(piece_id)
-    piece_group = piece_id // 4
+    piece_group = piece.buscaGrupo(piece_id)
 
     if original_position in get_spawn_positions(piece_group).values() and steps not in [1, 6]:
         return
@@ -489,7 +489,7 @@ def move_piece(piece_id, steps):
      NEGATIVE_STEPS, caso steps seja negativo.
     """
 
-    if piece_id < 0 or piece_id > 15:
+    if piece.buscaGrupo(piece_id) == -1:
         return INVALID_PIECE_ID
     elif steps < 0:
         return NEGATIVE_STEPS
@@ -507,20 +507,20 @@ def move_piece(piece_id, steps):
 
     if new_position == get_finish_position(piece_id // 4) or len(pieces_at_new_pos) == 0:
         # caso seja o final do tabuleiro ou não haja outra peça na nova posição, as peças podem se mover para lá
-        for piece in pieces:
-            set_piece_position(piece, new_position)
+        for piece_at in pieces:
+            set_piece_position(piece_at, new_position)
     elif len(pieces_at_new_pos) == 2:
         # caso tenha um bloco na nova posição, todas as peças voltam para suas posições de origem
-        for piece in pieces_at_new_pos:
-            move_piece_to_spawn(piece)
-        for piece in pieces:
-            move_piece_to_spawn(piece)
+        for piece_at in pieces_at_new_pos:
+            move_piece_to_spawn(piece_at)
+        for piece_at in pieces:
+            move_piece_to_spawn(piece_at)
     else:
         # haverá uma peça na nova posição, que pode ser do mesmo grupo ou não
-        for piece in pieces:
-            set_piece_position(piece, new_position)
+        for piece_at in pieces:
+            set_piece_position(piece_at, new_position)
 
-        other_group = pieces_at_new_pos[0] // 4
+        other_group = piece.buscaGrupo(pieces_at_new_pos[0])
         # se a peça for de outro grupo, move ela para sua posição de orgiem
         if other_group != piece_group:
             move_piece_to_spawn(pieces_at_new_pos[0])
