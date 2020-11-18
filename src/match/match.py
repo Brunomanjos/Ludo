@@ -1,5 +1,5 @@
 # Módulo Match
-# Atualizado: 12/11/2020
+# Atualizado: 16/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 from random import randint, shuffle
@@ -330,6 +330,8 @@ def save_match():
         SubElement(player_element, 'player', {'id': str(index)}).text = name
 
     SubElement(root, 'sequence').text = str(match['sequence'])
+
+    SubElement(root, 'ended').text = str(len(finished_players()) >= 3)
 
     history_element = SubElement(root, 'history')
     for (piece_id, steps) in history:
