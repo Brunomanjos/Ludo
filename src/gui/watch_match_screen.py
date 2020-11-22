@@ -1,6 +1,7 @@
-# Módulo GUI - Assistir Partida
-# Atualizado: 21/11/2020
+# Módulo GUI - Tela do Tabuleiro
+# Atualizado: 12/11/2020
 # Autor: Bruno Messeder dos Anjos
+
 
 __all__ = ['get']
 
@@ -15,8 +16,6 @@ import match
 import piece
 import player
 from gui.sprite import *
-
-# TODO fix this file (watch match screen)
 
 
 def get_pos(square, offset=True):
@@ -64,16 +63,16 @@ def update_blocks():
 
 
 def update_finished_players():
-    current_finished_players = set(match.finished_players())
+    current_finished_players = set(match.winners())
 
-    if current_finished_players == finished_players:
+    if current_finished_players == winners:
         return
 
     for player_id in current_finished_players:
-        if player_id not in finished_players:
-            finished_players.append(player_id)
+        if player_id not in winners:
+            winners.append(player_id)
             name = player.get_player(player_id)
-            place = len(finished_players)
+            place = len(winners)
             show_dialog(f'{name}\nterminou em {place}º lugar')
 
 
@@ -93,9 +92,17 @@ def on_animation_end():
 
 
 def on_match_end():
-    import gui
-    # TODO show winners screen
-    gui.show_main_menu()
+    names = [player.get_player(index) for index in match.winners()]
+
+    match.close_match()
+    show_end_dialog('1º Lugar: {}\n2º Lugar: {}\n3º Lugar: {}\n4º Lugar: {}'.format(*names))
+
+
+def show_end_dialog(text):
+    global end_dialog
+
+    show_dialog(text)
+    end_dialog = True
 
 
 def check_play(piece):
@@ -118,7 +125,7 @@ def check_play(piece):
 
     show_next_player = match.current_player() != last_player
 
-    if play_result is None:
+    if play_result is True:
         show_dice_button()
 
 
@@ -130,7 +137,7 @@ def on_piece_move(piece):
 def events_handler(event):
     if event.key == K_ESCAPE:
         toggle_pause_menu()
-    # TODO add event to play when clicked
+    # TODO events
 
 
 def get_pieces_at(pos):
@@ -168,8 +175,12 @@ def show_dialog(text):
 
 
 def hide_dialog():
+    import gui
+
     dialog_queue.clear()
     screen.remove(dialog)
+    if end_dialog:
+        gui.show_main_menu()
 
 
 def toggle_pause_menu():
@@ -256,7 +267,7 @@ def get():
     """
     Inicializa a tela do tabuleiro e retorna os sprites presentes na tela.
     """
-    global finished_players
+    global winners, end_dialog
 
     if not screen:
         init()
@@ -265,7 +276,8 @@ def get():
     update_player_names()
     highlight_player()
     update_blocks()
-    finished_players = match.finished_players()
+    winners = match.winners()
+    end_dialog = False
 
     show_dialog(f'Vez de {match.current_player_name()}')
     screen.remove(pause_menu)
@@ -274,6 +286,6 @@ def get():
 
 
 screen, dialog, pause_menu = None, None, None
-pieces, players, finished_players, dialog_queue = [], [], [], []
+pieces, players, winners, dialog_queue = [], [], [], []
 square_size, offset_x, offset_y = 59, 0, 0
-show_next_player = False
+show_next_player, end_dialog = False, False

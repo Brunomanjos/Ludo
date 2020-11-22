@@ -17,8 +17,9 @@ import piece
 import player
 
 __all__ = ['new_match', 'play', 'current_player', 'load_match', 'close_match', 'can_play',
-           'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER', 'MATCH_ENDED', 'MATCH_IN_PROGRESS',
-           'INVALID_DATA', 'DICE_NOT_THROWN', 'current_player_name', 'INVALID_ID', 'INVALID_STEPS', 'finished_players']
+           'CANNOT_MOVE_PIECE', 'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER',
+           'MATCH_ENDED', 'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN',
+           'current_player_name', 'INVALID_ID', 'INVALID_STEPS', 'winners']
 
 MATCH_NOT_DEFINED = -1
 INVALID_PIECE = -2
@@ -29,9 +30,10 @@ INVALID_DATA = -6
 DICE_NOT_THROWN = -7
 INVALID_STEPS = -8
 INVALID_ID = -9
+CANNOT_MOVE_PIECE = -10
 
 # versão dos arquivos xml, para evitar erros ao carregar uma partida
-_XML_VERSION = '0.4'
+_XML_VERSION = '0.7'
 
 match: Optional[dict] = None
 
@@ -61,7 +63,8 @@ def new_match(p1, p2, p3, p4):
 
     match = {
         'current_player': randint(0, 3),  # id do jogador atual. também é o grupo da peça do jogador atual
-        'sequence': 0  # jogadas em sequência de um jogador. No máximo 3 antes de pular a vez
+        'sequence': 0,  # jogadas em sequência de um jogador. No máximo 3 antes de pular a vez
+        'winners': []  # os índices dos ganhadores, em ordem
     }
 
     current_turn = 0
@@ -77,7 +80,8 @@ def play(piece_id):
     Faz uma jogada, movendo uma peça
 
     :param piece_id: id da peça, ou None, caso não haja jogada possível para o jogador atual.
-    :return: None caso a jogada tenha sido efetuada.
+    :return: True caso a jogada tenha sido efetuada.
+     CANNOT_MOVE_PIECE caso a peça não possa ser movida.
      MATCH_NOT_DEFINED caso a partida não tenha sido definida
      INVALID_PIECE caso o id da peça seja seja inválido.
      DICE_NOT_THROWN caso o dado não tenha sido jogado nessa rodada.
@@ -104,7 +108,6 @@ def play(piece_id):
             return INVALID_PIECE
         dice.clear()
         next_player()
-        check_winner()
         save_move(None)
         return
 
@@ -112,11 +115,13 @@ def play(piece_id):
         return INVALID_PLAYER
 
     piece_pos = board.get_piece_position(piece_id)
-    if piece_pos not in board.get_spawn_positions(player) or steps == 6:
-        # move a peça se ela não estiver na posição inicial ou,
-        # caso esteja, o número de paços seja igual a 6
-        board.move_piece(piece_id, steps)
-        save_move(piece_id)
+
+    # a peça não pode ser movida caso esteja no spawn e steps não for 1 ou 6.
+    if piece_pos in board.get_spawn_positions(player).values() and steps not in [1, 6]:
+        return CANNOT_MOVE_PIECE
+
+    board.move_piece(piece_id, steps)
+    save_move(piece_id)
 
     match['sequence'] += 1
 
@@ -125,9 +130,11 @@ def play(piece_id):
         match['sequence'] = 0
         next_player()
 
-    check_winner()
+    check_match_end()
 
     dice.clear()
+
+    return True
 
 
 def save_move(piece_id):
@@ -145,41 +152,49 @@ def save_move(piece_id):
     current_turn += 1
 
 
-def finished_players():
+def winners():
     """
-    :return: lista dos jogadores que acabaram de jogar.
+    :return: lista dos jogadores (índices) que terminaram de jogar, em ordem.
     """
-    players = []
-
-    for player in range(4):
-        pieces = board.get_pieces_at(board.get_finish_position(player))
-        if len(pieces) == 4:
-            players.append(player)
-
-    return players
+    return match['winners']
 
 
 def next_player():
     """
     Passa a vez para o próximo jogador.
     """
-    next = (current_player() + 1) % 4
-    finished = finished_players()
-    if len(finished) >= 3:
-        return  # o jogo acabou. 3 ou 4 jogadores acabaram
 
+    check_match_end()
+    if current_player() == MATCH_ENDED:
+        return
+
+    next = (current_player() + 1) % 4
+
+    finished = winners()
     while next in finished:
         next = (next + 1) % 4  # passa pelos jogadores até achar um que não tenha terminado de jogar.
 
     match['current_player'] = next
 
 
-def check_winner():
+def check_match_end():
     """
     Verifica se o jogo acabou. O jogo acaba quando todas as peças de três jogadores chegam ao centro do tabuleiro.
     """
 
-    if len(finished_players()) >= 3:
+    for player in range(4):
+        pos = board.get_finish_position(player)
+        if len(board.get_pieces_at(pos)) == 4 and player not in winners():
+            match['winners'].append(player)
+            break
+
+    if len(winners()) == 3:
+        for last_place in range(4):
+            if last_place not in winners():
+                match['winners'].append(last_place)
+                break
+
+    if len(winners()) >= 3:
         match['current_player'] = None
 
 
@@ -266,10 +281,17 @@ def get_match(match_id):
 
     data['sequence'] = int(sequence.text)
 
+    winners_element = root.find('winners')
+
+    data['winners'] = [-1] * len(winners_element)
+
+    for winner in winners_element:
+        data['winners'][int(winner.attrib['index'])] = int(winner.text)
+
     for move in root.find('history'):
         piece_id = move.attrib['piece_id']
         steps = move.attrib['steps']
-        turn = move.attrib['turn']
+        turn = int(move.attrib['turn'])
         data['history'].append({'piece_id': piece_id, 'steps': steps, 'turn': turn})
 
     # ordena o histórico a partir do turno
@@ -314,7 +336,7 @@ def load_match(match_id):
             database.execute(f'INSERT INTO History VALUES (NULL, {steps}, {turn})')
 
     match = data
-    current_turn = data['current_player']
+    current_turn = len(data['history'])
 
 
 def close_match(save_match_data=True):
@@ -363,7 +385,11 @@ def save_match():
 
     SubElement(root, 'sequence').text = str(match['sequence'])
 
-    SubElement(root, 'ended').text = str(len(finished_players()) >= 3)
+    winners_element = SubElement(root, 'winners')
+    for index, winner in enumerate(match['winners']):
+        SubElement(winners_element, 'winner', {'index': str(index)}).text = str(winner)
+
+    SubElement(root, 'ended').text = str(len(match['winners']) >= 3)
 
     history_element = SubElement(root, 'history')
     for (piece_id, steps, turn) in history:

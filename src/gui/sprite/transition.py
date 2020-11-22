@@ -1,5 +1,5 @@
 # Sprites - Transição
-# Atualizado: 30/10/2020
+# Atualizado: 22/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 import pygame
@@ -23,9 +23,10 @@ class Transition(pygame.sprite.Sprite):
         self.start_pos = sprite.rect.center
         self.end_pos = new_pos
         self.duration = duration
-        self.frames = duration * gui.FPS
+        self.frames = int(duration * gui.FPS)
         self._current_frame = 0
         self._on_end = on_end
+        self._ended = False
 
         x0, y0 = self.start_pos
         x1, y1 = self.end_pos
@@ -35,11 +36,13 @@ class Transition(pygame.sprite.Sprite):
     def update(self):
         self._current_frame += 1
 
-        if self._current_frame == self.frames and self._on_end:
-            self._on_end()
-        if self._current_frame > self.frames:
+        if self._current_frame >= self.frames:
             self.sprite.rect.center = self.end_pos
             self.kill()
+            if not self._ended:
+                self._ended = True
+                if self._on_end:
+                    self._on_end()
 
         x, y = self.start_pos
 

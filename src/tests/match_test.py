@@ -1,7 +1,7 @@
 # Teste Automatizado do módulo Match
-# Atualizado: 12/11/2020
+# Atualizado: 22/11/2020
 # Autor: Bruno Messeder dos Anjos
-import os
+
 import unittest
 
 import dice
@@ -39,21 +39,36 @@ class MatchTest(unittest.TestCase):
         self.assertEqual(match.DICE_NOT_THROWN, match.play(0))
         self.assertEqual(match.DICE_NOT_THROWN, match.play(1))
 
-    def test_10_play_ok(self):
+    def test_10_play_cannot_move_piece(self):
         player = match.current_player()
         piece = player * 4
 
         dice.throw()
-        self.assertIsNone(match.play(piece))
+        # força o dado a ser diferente de 1 e 6
+        while dice.get() in [1, 6]:
+            dice.throw()
 
-    def test_11_can_play_6(self):
+        self.assertEqual(match.CANNOT_MOVE_PIECE, match.play(piece))
+
+    def test_11_play_ok(self):
+        player = match.current_player()
+        piece = player * 4 + 1
+
+        dice.throw()
+        # força o dado a ser de 1 ou 6
+        while dice.get() not in [1, 6]:
+            dice.throw()
+
+        self.assertTrue(match.play(piece) is True)
+
+    def test_12_can_play_6(self):
         self.assertTrue(match.can_play(6))
 
-    def test_12_can_play_invalid_steps(self):
+    def test_13_can_play_invalid_steps(self):
         self.assertTrue(match.can_play(-1))
         self.assertTrue(match.can_play(7))
 
-    def test_13_close_match_ok(self):
+    def test_14_close_match_ok(self):
         self.assertTrue(match.close_match(False))
         self.assertEqual(match.MATCH_NOT_DEFINED, match.play(0))
 

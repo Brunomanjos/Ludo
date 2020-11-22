@@ -15,6 +15,13 @@ from pygame.locals import *
 __all__ = ['get']
 
 
+def event_handler(event):
+    import gui
+    if event.key == K_ESCAPE:
+        gui.show_main_menu()
+        return True
+
+
 def on_click(match_id):
     import gui
 
@@ -116,7 +123,9 @@ def init():
                        bg=(134, 184, 53),
                        midleft=(95, gui.HEIGHT / 2))
 
-    menu = pygame.sprite.Group(bg, back, title)
+    event = EventSprite([KEYDOWN], event_handler)
+
+    menu = pygame.sprite.Group(bg, back, title, event)
 
 
 def get():

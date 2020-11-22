@@ -11,8 +11,12 @@ from gui.sprite import *
 __all__ = ['get']
 
 
-def tab_event(event):
-    if event.key != K_TAB or dialog in menu:
+def event_handler(event):
+    import gui
+    if event.key == K_ESCAPE:
+        gui.show_main_menu()
+        return True
+    elif event.key != K_TAB or dialog in menu:
         return False
     if event.mod & KMOD_LSHIFT:  # shift + tab
         select_previous()
@@ -122,7 +126,7 @@ def init():
 
     l4 = Label((100, 40), 'Jogador 4', midbottom=t4.rect.midtop)
 
-    event = EventSprite([KEYDOWN], tab_event)
+    event = EventSprite([KEYDOWN], event_handler)
 
     dialog_bg = Canvas((gui.WIDTH, gui.HEIGHT), True)
     dialog_bg.image.fill((0, 0, 0, 147))
