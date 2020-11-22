@@ -1,5 +1,5 @@
 # Módulo GUI
-# Atualizado: 12/11/2020
+# Atualizado: 21/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 import os
@@ -13,10 +13,14 @@ import database
 import gui.board_screen
 import gui.main_menu
 import gui.set_players_menu
+import gui.load_match_menu
+import gui.load_watch_match_menu
+import gui.watch_match_screen
 import match
 from gui.sprite import *
 
-__all__ = ['loop', 'show_main_menu', 'show_set_players_menu', 'show_board', 'WIDTH', 'HEIGHT', 'FPS', 'exit_gui']
+__all__ = ['loop', 'show_main_menu', 'show_set_players_menu', 'show_board', 'WIDTH', 'HEIGHT', 'FPS',
+           'exit_gui', 'show_load_match_menu', 'show_load_watch_match_menu', 'show_watch_match_screen']
 
 WIDTH = 1200
 HEIGHT = 903
@@ -117,3 +121,27 @@ def show_board():
     """
     global sprites
     sprites = gui.board_screen.get()
+
+
+def show_load_match_menu():
+    """
+    Muda a tela atual para o menu de carregamento de uma partida já começada
+    """
+    global sprites
+    sprites = gui.load_match_menu.get()
+
+
+def show_load_watch_match_menu():
+    """
+    Muda a tela atual para o menu de carregamento de uma partida já terminada
+    """
+    global sprites
+    sprites = gui.load_watch_match_menu.get()
+
+
+def show_watch_match_screen():
+    """
+    Muda a tela atual para a tela para assistir uma partida já terminada
+    """
+    global sprites
+    sprites = gui.watch_match_screen.get()

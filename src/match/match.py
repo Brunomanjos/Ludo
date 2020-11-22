@@ -1,9 +1,9 @@
 # Módulo Match
-# Atualizado: 16/11/2020
+# Atualizado: 21/11/2020
 # Autor: Bruno Messeder dos Anjos
 
+import re
 from random import randint, shuffle
-from time import time
 from typing import Optional
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement, parse
@@ -29,6 +29,9 @@ INVALID_DATA = -6
 DICE_NOT_THROWN = -7
 INVALID_STEPS = -8
 INVALID_ID = -9
+
+# versão dos arquivos xml, para evitar erros ao carregar uma partida
+_XML_VERSION = '0.4'
 
 match: Optional[dict] = None
 
@@ -214,18 +217,15 @@ def current_player_name():
     return player.get_player(current)
 
 
-def load_match(match_id):
+def get_match(match_id):
     """
-    Carrega uma partida já começada.
+    Retorna o conteúdo de uma partida salva.
 
     :param match_id: o id da partida
-    :return: True caso a partida tenha sido carregada.
-     MATCH_IN_PROGRESS caso já tenha uma partida em andamento.
+    :return: dados da partida em um dicionário, caso a partida tenha sido carregada.
      INVALID_ID caso o id da partida seja inválido.
      INVALID_DATA caso os dados da partida sejam inválidos.
     """
-
-    global match, current_turn
 
     if match:
         return MATCH_IN_PROGRESS
@@ -235,7 +235,7 @@ def load_match(match_id):
     if not os.path.isfile(path):
         return INVALID_ID
 
-    data = {}
+    data = {'players': {}, 'history': []}
 
     root = parse(path).getroot()
     players = root.find('players')
@@ -244,7 +244,7 @@ def load_match(match_id):
         return INVALID_DATA
 
     for player_element in players:
-        player.set_player(int(player_element.attrib['id']), player_element.text)
+        data['players'][int(player_element.attrib['id'])] = player_element.text
 
     match_id_element = root.find('matchID')
     if match_id_element is None:
@@ -266,15 +266,46 @@ def load_match(match_id):
 
     data['sequence'] = int(sequence.text)
 
+    for move in root.find('history'):
+        piece_id = move.attrib['piece_id']
+        steps = move.attrib['steps']
+        turn = move.attrib['turn']
+        data['history'].append({'piece_id': piece_id, 'steps': steps, 'turn': turn})
+
+    # ordena o histórico a partir do turno
+    data['history'].sort(key=lambda e: e['turn'])
+
+    return data
+
+
+def load_match(match_id):
+    """
+    Carrega uma partida já começada.
+
+    :param match_id: o id da partida
+    :return: True caso a partida tenha sido carregada.
+     MATCH_IN_PROGRESS caso já tenha uma partida em andamento.
+     INVALID_ID caso o id da partida seja inválido.
+     INVALID_DATA caso os dados da partida sejam inválidos.
+    """
+
+    global match, current_turn
+
+    data = get_match(match_id)
+    if data in [INVALID_ID, MATCH_IN_PROGRESS, INVALID_DATA]:
+        return data
+
+    for index, name in data['players'].items():
+        player.set_player(index, name)
+
     board.reset_board()
     database.execute('CREATE TABLE IF NOT EXISTS History(piece_id int, steps int NOT NULL, turn int NOT NULL)')
     database.execute('DELETE FROM History')
 
-    for turn, move in enumerate(root.find('history')):
-        piece_id = move.attrib['piece_id']
-        steps = move.attrib['steps']
-
-        current_turn = turn
+    for move in data['history']:
+        piece_id = move['piece_id']
+        steps = move['steps']
+        turn = move['turn']
 
         if piece_id != 'None':
             board.move_piece(int(piece_id), int(steps))
@@ -283,8 +314,7 @@ def load_match(match_id):
             database.execute(f'INSERT INTO History VALUES (NULL, {steps}, {turn})')
 
     match = data
-
-    return True
+    current_turn = data['current_player']
 
 
 def close_match(save_match_data=True):
@@ -313,9 +343,11 @@ def save_match():
     """
     Salva a partida atual em um arquivo xml
     """
-    history = database.fetchall('SELECT piece_id, steps FROM History ORDER BY turn')
+    history = database.fetchall('SELECT piece_id, steps, turn FROM History ORDER BY turn')
 
     root = Element('match')
+
+    SubElement(root, 'version').text = _XML_VERSION
 
     if 'id' in match:
         match_id = match['id']
@@ -334,8 +366,8 @@ def save_match():
     SubElement(root, 'ended').text = str(len(finished_players()) >= 3)
 
     history_element = SubElement(root, 'history')
-    for (piece_id, steps) in history:
-        SubElement(history_element, 'move', {'piece_id': str(piece_id), 'steps': str(steps)})
+    for (piece_id, steps, turn) in history:
+        SubElement(history_element, 'move', {'piece_id': str(piece_id), 'steps': str(steps), 'turn': str(turn)})
 
     data = parseString(ElementTree.tostring(root, 'utf-8')).toprettyxml(indent='  ')
 
@@ -399,3 +431,24 @@ def can_play(steps):
 
     # retorna verdadeiro se existe pelo menos uma peça fora da origem com steps < 6
     return piece_pos != spawn_pos
+
+
+def check_files():
+    pattern = re.compile('match (\\d+).xml')
+
+    directory = os.path.join(os.environ['appdata'], '.ludo')
+
+    for file_name in os.listdir(directory):
+        match = pattern.fullmatch(file_name)
+        path = os.path.join(directory, file_name)
+
+        if not match:
+            continue
+
+        xml_root = parse(path).getroot()
+        version = xml_root.find('version')
+        if version is None or version.text != _XML_VERSION:
+            os.remove(path)
+
+
+check_files()

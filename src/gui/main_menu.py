@@ -11,15 +11,13 @@ __all__ = ['get']
 
 
 def match_history_action():
-    pass  # TODO show watch match menu
+    import gui
+    gui.show_load_watch_match_menu()
 
 
 def load_match_action():
     import gui
-    if match.load_match(1) is not True:
-        return
-    gui.show_board()
-    # TODO show load match menu
+    gui.show_load_match_menu()
 
 
 def init():
