@@ -1,5 +1,5 @@
 # Módulo GUI - Tela do Tabuleiro
-# Atualizado: 12/11/2020
+# Atualizado: 21/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 

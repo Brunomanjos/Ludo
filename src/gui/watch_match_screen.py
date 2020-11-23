@@ -1,5 +1,5 @@
-# Módulo GUI - Tela do Tabuleiro
-# Atualizado: 12/11/2020
+# Módulo GUI - Assistir uma Partida
+# Atualizado: 23/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 
@@ -105,43 +105,10 @@ def show_end_dialog(text):
     end_dialog = True
 
 
-def check_play(piece):
-    global show_next_player
-
-    played_square = get_square(piece.rect.center)
-    dice_value = dice.get()
-
-    if dice_value is None:
-        return
-
-    possible_play = board.get_possible_move(piece.piece_id, dice_value)
-    if possible_play != played_square:
-        return
-
-    last_player = match.current_player()
-
-    play_result = match.play(piece.piece_id)
-    highlight_player()
-
-    show_next_player = match.current_player() != last_player
-
-    if play_result is True:
-        show_dice_button()
-
-
-def on_piece_move(piece):
-    check_play(piece)
-    update_pieces_positions(True)
-
-
 def events_handler(event):
     if event.key == K_ESCAPE:
         toggle_pause_menu()
     # TODO events
-
-
-def get_pieces_at(pos):
-    return [piece for piece in pieces if piece.collidepoint(pos)]
 
 
 def highlight_player():
