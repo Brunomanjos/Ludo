@@ -16,10 +16,10 @@ import dice
 import piece
 import player
 
-__all__ = ['new_match', 'play', 'current_player', 'load_match', 'close_match', 'can_play',
+__all__ = ['MATCH_ENDED', 'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN', 'winners',
+           'new_match', 'play', 'current_player', 'load_match', 'close_match', 'can_play',
            'CANNOT_MOVE_PIECE', 'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER',
-           'MATCH_ENDED', 'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN',
-           'current_player_name', 'INVALID_ID', 'INVALID_STEPS', 'winners']
+           'current_player_name', 'INVALID_ID', 'INVALID_STEPS', 'next_move']
 
 MATCH_NOT_DEFINED = -1
 INVALID_PIECE = -2
@@ -32,8 +32,8 @@ INVALID_STEPS = -8
 INVALID_ID = -9
 CANNOT_MOVE_PIECE = -10
 
-# versão dos arquivos xml, para evitar erros ao carregar uma partida
-_XML_VERSION = '0.7'
+# versão dos arquivos xml, para evitar erros ao carregar uma partida. (Deleta as partidas com versão diferente)
+_XML_VERSION = '0.8'
 
 match: Optional[dict] = None
 
@@ -61,8 +61,11 @@ def new_match(p1, p2, p3, p4):
     player.set_players(*players)
     board.reset_board()
 
+    first_player = randint(0, 3)
+
     match = {
-        'current_player': randint(0, 3),  # id do jogador atual. também é o grupo da peça do jogador atual
+        'current_player': first_player,  # id do jogador atual. Também é o grupo da peça do jogador atual
+        'first_player': first_player,  # id do primeiro jogador. Usado ao assistir a uma partida terminada
         'sequence': 0,  # jogadas em sequência de um jogador. No máximo 3 antes de pular a vez
         'winners': []  # os índices dos ganhadores, em ordem
     }
@@ -188,13 +191,13 @@ def check_match_end():
             match['winners'].append(player)
             break
 
+    # caso 3 jogadores tenham acabado, o quarto fica em último lugar
     if len(winners()) == 3:
         for last_place in range(4):
             if last_place not in winners():
                 match['winners'].append(last_place)
                 break
 
-    if len(winners()) >= 3:
         match['current_player'] = None
 
 
@@ -267,32 +270,44 @@ def get_match(match_id):
 
     data['id'] = int(match_id_element.text)
 
+    data['ended'] = root.find('ended').text == 'True'
+
+    data['first_player'] = int(root.find('firstPlayer').text)
+
     current_player = root.find('currentPlayer')
 
-    if current_player is None:
-        return INVALID_DATA
-
-    data['current_player'] = int(current_player.text)
+    if data['ended']:
+        data['current_player'] = data['first_player']
+    else:
+        data['current_player'] = int(current_player.text)
 
     sequence = root.find('sequence')
 
     if sequence is None:
         return INVALID_DATA
 
-    data['sequence'] = int(sequence.text)
+    if data['ended']:
+        data['sequence'] = 0
+    else:
+        data['sequence'] = int(sequence.text)
 
     winners_element = root.find('winners')
 
-    data['winners'] = [-1] * len(winners_element)
-
-    for winner in winners_element:
-        data['winners'][int(winner.attrib['index'])] = int(winner.text)
+    if data['ended']:
+        data['winners'] = []
+    else:
+        data['winners'] = [-1] * len(winners_element)
+        for winner in winners_element:
+            data['winners'][int(winner.attrib['index'])] = int(winner.text)
 
     for move in root.find('history'):
         piece_id = move.attrib['piece_id']
-        steps = move.attrib['steps']
+        steps = int(move.attrib['steps'])
         turn = int(move.attrib['turn'])
-        data['history'].append({'piece_id': piece_id, 'steps': steps, 'turn': turn})
+        if piece_id == 'None':
+            data['history'].append({'piece_id': None, 'steps': steps, 'turn': turn})
+        else:
+            data['history'].append({'piece_id': int(piece_id), 'steps': steps, 'turn': turn})
 
     # ordena o histórico a partir do turno
     data['history'].sort(key=lambda e: e['turn'])
@@ -302,7 +317,7 @@ def get_match(match_id):
 
 def load_match(match_id):
     """
-    Carrega uma partida já começada.
+    Carrega uma partida já começada, ou uma partida para ser assistida.
 
     :param match_id: o id da partida
     :return: True caso a partida tenha sido carregada.
@@ -324,19 +339,23 @@ def load_match(match_id):
     database.execute('CREATE TABLE IF NOT EXISTS History(piece_id int, steps int NOT NULL, turn int NOT NULL)')
     database.execute('DELETE FROM History')
 
-    for move in data['history']:
-        piece_id = move['piece_id']
-        steps = move['steps']
-        turn = move['turn']
+    if not data['ended']:
+        current_turn = len(data['history'])
 
-        if piece_id != 'None':
-            board.move_piece(int(piece_id), int(steps))
-            database.execute(f'INSERT INTO History VALUES ({piece_id}, {steps}, {turn})')
-        else:
-            database.execute(f'INSERT INTO History VALUES (NULL, {steps}, {turn})')
+        for move in data['history']:
+            piece_id = move['piece_id']
+            steps = move['steps']
+            turn = move['turn']
+
+            if piece_id is None:
+                database.execute(f'INSERT INTO History VALUES (NULL, {steps}, {turn})')
+            else:
+                board.move_piece(int(piece_id), int(steps))
+                database.execute(f'INSERT INTO History VALUES ({piece_id}, {steps}, {turn})')
+    else:
+        current_turn = 0
 
     match = data
-    current_turn = len(data['history'])
 
 
 def close_match(save_match_data=True):
@@ -352,7 +371,7 @@ def close_match(save_match_data=True):
     if not match:
         return False
 
-    if save_match_data:
+    if save_match_data and not match.get('ended'):
         save_match()
 
     board.reset_board()
@@ -378,6 +397,7 @@ def save_match():
 
     SubElement(root, 'matchID').text = str(match_id)
     SubElement(root, 'currentPlayer').text = str(match['current_player'])
+    SubElement(root, 'firstPlayer').text = str(match['first_player'])
 
     player_element = SubElement(root, 'players')
     for index, name in enumerate(player.get_players()):
@@ -475,6 +495,47 @@ def check_files():
         version = xml_root.find('version')
         if version is None or version.text != _XML_VERSION:
             os.remove(path)
+
+
+def next_move():
+    """
+    Move para a próxima jogada da partida. Só pode ser chamada
+    caso a partida atual esteja sendo assistida, e não jogada.
+
+    :return: True caso a próxima jogada tenha sido efetuada.
+     False caso a partida atual não seja sendo assistida.
+     MATCH_ENDED caso a partida tenha acabado.
+     MATCH_NOT_DEFINED caso a partida não tenha side definida.
+    """
+    if not match:
+        return MATCH_NOT_DEFINED
+    elif not match.get('ended'):
+        return False
+    elif current_player() == MATCH_ENDED:
+        return MATCH_ENDED
+
+    global current_turn
+
+    turn = match['history'][current_turn]
+
+    piece_id = turn['piece_id']
+    steps = turn['steps']
+
+    current_turn += 1
+
+    if piece_id is not None:
+        board.move_piece(piece_id, steps)
+
+    match['sequence'] += 1
+
+    if steps < 6 or match['sequence'] >= 3:
+        # muda o turno para o próximo jogador
+        match['sequence'] = 0
+        next_player()
+
+    check_match_end()
+
+    return True
 
 
 check_files()

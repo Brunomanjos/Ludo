@@ -1,5 +1,5 @@
 # Módulo GUI - Assistir uma Partida
-# Atualizado: 23/11/2020
+# Atualizado: 30/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 
@@ -11,7 +11,6 @@ import pygame
 from pygame.locals import *
 
 import board
-import dice
 import match
 import piece
 import player
@@ -27,12 +26,6 @@ def get_pos(square, offset=True):
     return int(x), int(y)
 
 
-def get_square(position):
-    square_x = int((position[0] - offset_x - 2) / (square_size + 1))
-    square_y = int((position[1] - offset_y - 2) / (square_size + 1))
-    return square_y, square_x
-
-
 def update_piece_position(piece, animated):
     piece_position = piece.rect.center
     piece_square = board.get_piece_position(piece.piece_id)
@@ -43,6 +36,11 @@ def update_piece_position(piece, animated):
     if new_position == piece_position:
         return
     elif animated:
+        new_transition = Transition(piece, new_position, 0.3, on_animation_end)
+        for transition in screen:
+            if new_transition.equals(transition):
+                return
+
         screen.add(Transition(piece, new_position, 0.3, on_animation_end))
     else:
         piece.rect.center = new_position
@@ -77,18 +75,11 @@ def update_finished_players():
 
 
 def on_animation_end():
-    global show_next_player
-
     update_blocks()
     update_finished_players()
 
-    if show_next_player:
-        player_name = match.current_player_name()
-        if player_name == match.MATCH_ENDED:
-            on_match_end()
-            return
-        show_dialog(f'Vez de {player_name}')
-        show_next_player = False
+    if match.current_player_name() == match.MATCH_ENDED:
+        on_match_end()
 
 
 def on_match_end():
@@ -106,9 +97,16 @@ def show_end_dialog(text):
 
 
 def events_handler(event):
-    if event.key == K_ESCAPE:
+    if event.type == KEYDOWN and event.key == K_ESCAPE:
         toggle_pause_menu()
-    # TODO events
+
+    if pause_menu in dialog or dialog in screen or event.consumed:
+        return
+
+    elif (event.type == MOUSEBUTTONUP and event.button == 1) or (event.type == KEYDOWN and event.key == K_RIGHT):
+        match.next_move()
+        update_pieces_positions(True)
+        highlight_player()
 
 
 def highlight_player():
@@ -159,7 +157,7 @@ def toggle_pause_menu():
 
 def exit_game():
     import gui
-    match.close_match()
+    match.close_match(False)
     gui.show_main_menu()
 
 
@@ -187,7 +185,7 @@ def init():
     pieces = [PieceSprite(piece) for piece in range(16)]
 
     # eventos
-    events = EventSprite([MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, KEYDOWN], events_handler)
+    events = EventSprite([MOUSEBUTTONUP, KEYDOWN, KEYUP], events_handler)
 
     # nomes dos jogadores
     names = player.get_players()
@@ -234,7 +232,7 @@ def get():
     """
     Inicializa a tela do tabuleiro e retorna os sprites presentes na tela.
     """
-    global winners, end_dialog
+    global end_dialog
 
     if not screen:
         init()
@@ -243,10 +241,8 @@ def get():
     update_player_names()
     highlight_player()
     update_blocks()
-    winners = match.winners()
     end_dialog = False
 
-    show_dialog(f'Vez de {match.current_player_name()}')
     screen.remove(pause_menu)
 
     return screen
@@ -255,4 +251,4 @@ def get():
 screen, dialog, pause_menu = None, None, None
 pieces, players, winners, dialog_queue = [], [], [], []
 square_size, offset_x, offset_y = 59, 0, 0
-show_next_player, end_dialog = False, False
+end_dialog = False

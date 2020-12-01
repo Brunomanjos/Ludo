@@ -1,5 +1,5 @@
 # Sprites - Transição
-# Atualizado: 22/11/2020
+# Atualizado: 30/11/2020
 # Autor: Bruno Messeder dos Anjos
 
 import pygame
@@ -53,3 +53,9 @@ class Transition(pygame.sprite.Sprite):
             t = 4 * m ** 3
 
         self.sprite.rect.center = x + t * self.dx, y + t * self.dy
+
+    def equals(self, other):
+        if not isinstance(other, Transition):
+            return False
+
+        return self.sprite == other.sprite and self.end_pos == other.end_pos
