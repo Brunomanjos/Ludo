@@ -1,5 +1,5 @@
 # Sprites - Botão
-# Atualizado: 30/10/2020
+# Atualizado: 08/12/2020
 # Autor: Bruno Messeder dos Anjos
 
 
@@ -43,7 +43,7 @@ class Button(EventSprite):
             self._selected = False
             return False
 
-        self._selected = self.rect.collidepoint(event.pos)
+        self._selected = event.button == BUTTON_LEFT and self.rect.collidepoint(event.pos)
         if self._selected:
             self._bg_fill = darker(darker(self.bg))
             self._fg_fill = darker(darker(self.fg))

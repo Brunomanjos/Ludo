@@ -1,5 +1,5 @@
 # Módulo GUI - Tela do Tabuleiro
-# Atualizado: 21/11/2020
+# Atualizado: 08/12/2020
 # Autor: Bruno Messeder dos Anjos
 
 
@@ -164,7 +164,7 @@ def events_handler(event):
     elif event.type == MOUSEBUTTONDOWN:
         pieces_at = get_pieces_at(event.pos)
         current = match.current_player()
-        if get_square(event.pos) == board.get_finish_position(current):
+        if get_square(event.pos) == board.get_finish_position(current) or event.button != BUTTON_LEFT:
             return
         selected_pieces.extend([piece for piece in pieces_at if piece.piece_id // 4 == current])
 
