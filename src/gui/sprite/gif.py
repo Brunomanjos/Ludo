@@ -5,8 +5,13 @@
 import io
 import time
 from threading import Thread, Lock
-from PIL import Image
 import pygame
+
+try:
+    from PIL import Image
+except ImportError:
+    import Image
+
 
 __all__ = ['GIF']
 
