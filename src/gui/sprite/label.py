@@ -21,7 +21,7 @@ class Label(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface(size, pygame.SRCALPHA)
         self.rect = self.image.get_rect(**pos)
-        self.font = font or pygame.font.SysFont('monospace', 16, 1)
+        self.font = font or pygame.font.Font('res/fonts/LemonMilk.otf', 25)
         self.bg = bg
         self.fg = fg
         self.text = text

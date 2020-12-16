@@ -203,9 +203,9 @@ def check_match_end():
 
 def current_player():
     """
-    :return: o jogador atual, caso haja um partida em andamento.
-    MATCH_ENDED caso a partida tenha terminado.
-    MATCH_NOT_DEFINED caso a partida não tenha sido definida
+    :return: o jogador atual, caso haja uma partida em andamento.
+     MATCH_ENDED caso a partida tenha terminado.
+     MATCH_NOT_DEFINED caso a partida não tenha sido definida
     """
     if not match:
         return MATCH_NOT_DEFINED

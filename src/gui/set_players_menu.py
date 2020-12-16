@@ -91,46 +91,47 @@ def init():
     import gui
     global menu, t1, t2, t3, t4, dialog
 
-    bg = Canvas((gui.WIDTH, gui.HEIGHT))
-    bg.image.fill((100, 120, 150))
+    bg = gui.BACKGROUND_GIF
 
-    b1 = Button((160, 50),
+    b1 = Button((272, 109),
                 'Voltar',
                 gui.show_main_menu,
                 bg=(134, 184, 53),
+                bg_image='red.png',
                 center=(gui.WIDTH / 2 - 180, gui.HEIGHT / 2 + 160))
 
-    b2 = Button((160, 50),
-                'Começar Jogo',
+    b2 = Button((272, 109),
+                'Começar',
                 new_match,
                 bg=(134, 184, 53),
+                bg_image='green.png',
                 center=(gui.WIDTH / 2 + 180, gui.HEIGHT / 2 + 160))
 
     t1 = TextInput((250, 50), select_next,
-                   center=(gui.WIDTH / 2 - 180, gui.HEIGHT / 2 - 120))
+                   center=(gui.WIDTH / 2 - 180, gui.HEIGHT / 2 - 160))
 
-    l1 = Label((100, 40), 'Jogador 1', midbottom=t1.rect.midtop)
+    l1 = Label((160, 40), 'Jogador 1', midbottom=t1.rect.midtop)
 
     t2 = TextInput((250, 50), select_next,
-                   center=(gui.WIDTH / 2 + 180, gui.HEIGHT / 2 - 120))
+                   center=(gui.WIDTH / 2 + 180, gui.HEIGHT / 2 - 160))
 
-    l2 = Label((100, 40), 'Jogador 2', midbottom=t2.rect.midtop)
+    l2 = Label((160, 40), 'Jogador 2', midbottom=t2.rect.midtop)
 
     t3 = TextInput((250, 50), select_next,
-                   center=(gui.WIDTH / 2 - 180, gui.HEIGHT / 2 + 50))
+                   center=(gui.WIDTH / 2 - 180, gui.HEIGHT / 2 + 10))
 
-    l3 = Label((100, 40), 'Jogador 3', midbottom=t3.rect.midtop)
+    l3 = Label((160, 40), 'Jogador 3', midbottom=t3.rect.midtop)
 
     t4 = TextInput((250, 50), b2.action,
-                   center=(gui.WIDTH / 2 + 180, gui.HEIGHT / 2 + 50))
+                   center=(gui.WIDTH / 2 + 180, gui.HEIGHT / 2 + 10))
 
-    l4 = Label((100, 40), 'Jogador 4', midbottom=t4.rect.midtop)
+    l4 = Label((160, 40), 'Jogador 4', midbottom=t4.rect.midtop)
 
     event = EventSprite([KEYDOWN], event_handler)
 
     dialog_bg = Canvas((gui.WIDTH, gui.HEIGHT), True)
     dialog_bg.image.fill((0, 0, 0, 147))
-    dialog_rect = Rect(0, 0, 300, 160)
+    dialog_rect = Rect(0, 0, 320, 160)
     dialog_rect.center = (gui.WIDTH / 2, gui.HEIGHT / 2)
     dialog_bg.image.fill((255, 255, 255), dialog_rect)
 
@@ -139,10 +140,12 @@ def init():
 
     dialog_button = Button((160, 50), 'Ok', hide_dialog,
                            bg=(134, 184, 53),
+                           bg_image='green_small.png',
                            center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 30))
 
-    dialog_label = Label((300, 40), 'Os nomes dos quatro\njogadores são obrigatórios!',
-                         text_align=LEFT, center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 40))
+    dialog_label = Label((320, 80), 'Os nomes dos quatro\njogadores são obrigatórios!',
+                         text_align=LEFT, font=pygame.font.Font('res/fonts/LemonMilklight.otf', 20),
+                         center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 40))
 
     dialog = pygame.sprite.Group(dialog_bg, dialog_label, dialog_button)
 

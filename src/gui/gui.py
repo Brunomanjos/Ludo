@@ -1,5 +1,5 @@
 # Módulo GUI
-# Atualizado: 21/11/2020
+# Atualizado: 15/12/2020
 # Autor: Bruno Messeder dos Anjos
 
 import os
@@ -19,12 +19,19 @@ import gui.watch_match_screen
 import match
 from gui.sprite import *
 
-__all__ = ['loop', 'show_main_menu', 'show_set_players_menu', 'show_board', 'WIDTH', 'HEIGHT', 'FPS',
-           'exit_gui', 'show_load_match_menu', 'show_load_watch_match_menu', 'show_watch_match_screen']
+__all__ = ['loop', 'show_main_menu', 'show_set_players_menu', 'show_board', 'WIDTH',
+           'show_load_watch_match_menu', 'show_watch_match_screen', 'CENTER', 'SIZE',
+           'HEIGHT', 'FPS', 'BACKGROUND_GIF', 'exit_gui', 'show_load_match_menu']
 
 WIDTH = 1200
 HEIGHT = 903
+
+SIZE = WIDTH, HEIGHT
+CENTER = WIDTH / 2, HEIGHT / 2
+
 FPS = 60
+
+BACKGROUND_GIF = GIF('MAIN MENU/Background main menu looped.gif', True, wait_first_frame=True)
 
 BACKGROUND = (0, 0, 0)
 

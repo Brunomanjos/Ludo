@@ -20,7 +20,7 @@ class Transition(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
         self.sprite = sprite
-        self.start_pos = sprite.rect.center
+        self.start_pos = sprite.rect.midbottom
         self.end_pos = new_pos
         self.duration = duration
         self.frames = int(duration * gui.FPS)
@@ -37,7 +37,7 @@ class Transition(pygame.sprite.Sprite):
         self._current_frame += 1
 
         if self._current_frame >= self.frames:
-            self.sprite.rect.center = self.end_pos
+            self.sprite.rect.midbottom = self.end_pos
             self.kill()
             if not self._ended:
                 self._ended = True
@@ -52,7 +52,7 @@ class Transition(pygame.sprite.Sprite):
         else:
             t = 4 * m ** 3
 
-        self.sprite.rect.center = x + t * self.dx, y + t * self.dy
+        self.sprite.rect.midbottom = x + t * self.dx, y + t * self.dy
 
     def equals(self, other):
         if not isinstance(other, Transition):

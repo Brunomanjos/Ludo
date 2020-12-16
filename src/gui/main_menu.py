@@ -4,7 +4,6 @@
 
 import pygame
 
-import match
 from gui.sprite import *
 
 __all__ = ['get']
@@ -24,34 +23,39 @@ def init():
     import gui
     global menu
 
-    new_game = Button((240, 80),
+    logo = Image('main menu/LUDO TITULO PRINCIPAL.png', midtop=(gui.WIDTH / 2, 64))
+
+    new_game = Button((272, 109),
                       'Novo Jogo',
                       gui.show_set_players_menu,
-                      bg=(134, 184, 53),
-                      center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 180))
+                      bg=(255, 255, 255, 255),
+                      bg_image='green.png',
+                      center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 160))
 
-    load_game = Button((240, 80),
-                       'Carregar Partida',
+    load_game = Button((272, 109),
+                       'Carregar',
                        load_match_action,
-                       bg=(134, 184, 53),
-                       center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 60))
+                       bg=(255, 255, 255, 255),
+                       bg_image='blue.png',
+                       center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 20))
 
-    match_history = Button((240, 80),
-                           'Histórico de Partidas',
+    match_history = Button((272, 109),
+                           'Histórico',
                            match_history_action,
-                           bg=(134, 184, 53),
-                           center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 60))
+                           bg=(255, 255, 255, 255),
+                           bg_image='yellow.png',
+                           center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 120))
 
-    exit = Button((240, 80),
+    exit = Button((272, 109),
                   'Sair',
                   gui.exit_gui,
-                  bg=(134, 184, 53),
-                  center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 180))
+                  bg=(255, 255, 255, 255),
+                  bg_image='red.png',
+                  center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 260))
 
-    bg = Canvas((gui.WIDTH, gui.HEIGHT))
-    bg.image.fill((100, 100, 100))
+    bg = gui.BACKGROUND_GIF
 
-    menu = pygame.sprite.Group(bg, new_game, load_game, match_history, exit)
+    menu = pygame.sprite.Group(bg, logo, new_game, load_game, match_history, exit)
 
 
 def get():

@@ -1,8 +1,8 @@
 # Módulo Piece
-# Atualizado: 15/11/2020
+# Atualizado: 15/12/2020
 # Autor: Alberto Augusto Caldeira Brant
 
-__all__ = ['buscaGrupo', 'todasPecas', 'corPeca']
+__all__ = ['buscaGrupo', 'todasPecas', 'corPeca', 'nomeCorPeca']
 
 '''
 Grupo 0:
@@ -75,5 +75,20 @@ def corPeca(idPeca):
     elif idPeca <= 15:
         color = (150, 150, 0)
         return color
+    else:
+        return -1
+
+
+def nomeCorPeca(idPeca):
+    # Retorna o nome da cor da peça
+
+    if 0 <= idPeca <= 3:
+        return 'green'
+    elif idPeca <= 7:
+        return 'red'
+    elif idPeca <= 11:
+        return 'blue'
+    elif idPeca <= 15:
+        return 'yellow'
     else:
         return -1

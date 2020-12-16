@@ -3,14 +3,11 @@
 # Autor: Bruno Messeder dos Anjos
 
 import io
+import os
 import time
-from threading import Thread, Lock
+from threading import Thread, Lock, Condition
 import pygame
-
-try:
-    from PIL import Image
-except ImportError:
-    import Image
+from PIL import Image
 
 
 __all__ = ['GIF']
@@ -23,10 +20,10 @@ class GIF(pygame.sprite.Sprite):
     Sprite que representa um GIF.
     """
 
-    def __init__(self, path, loop, run_at_start, on_end=None, img_size=None, **pos):
+    def __init__(self, path, loop, run_at_start=True, on_end=None, img_size=None, wait_first_frame=False, **pos):
         pygame.sprite.Sprite.__init__(self)
 
-        gif = Image.open(path)
+        gif = Image.open(os.path.join('res', path))
 
         self._secs_on_screen = gif.info['duration'] / 1000
         self._last_img_time = time.time()
@@ -37,7 +34,13 @@ class GIF(pygame.sprite.Sprite):
 
         self.images = []
         self._image_index = -1
+        self._await_condition = Condition()
+
         Thread(target=self._load_all_images, args=[gif, img_size]).start()
+
+        if wait_first_frame:
+            with self._await_condition:
+                self._await_condition.wait()
 
         self.image = pygame.Surface(img_size or gif.size, pygame.SRCALPHA)
         self.rect = self.image.get_rect(**pos)
@@ -69,6 +72,9 @@ class GIF(pygame.sprite.Sprite):
             else:
                 self.image = surface
             self.images.append(surface)
+
+            with self._await_condition:
+                self._await_condition.notify()
 
         self._loading = False
         gif.close()

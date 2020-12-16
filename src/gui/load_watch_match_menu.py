@@ -1,5 +1,5 @@
 # Módulo GUI - Menu de Seleção de Partida já Terminada
-# Atualizado: 21/11/2020
+# Atualizado: 15/12/2020
 # Autor: Bruno Messeder dos Anjos
 
 import os
@@ -64,14 +64,19 @@ def load_page(new_page):
     menu.remove(match_buttons)
     match_buttons.empty()
 
-    for index in range(new_page * 10, (new_page + 1) * 10):
+    for index in range(new_page * 8, (new_page + 1) * 8):
         if index >= len(matches):
             break
         match_id = matches[index]
         x = 150 * (-1 if index % 2 == 0 else 1) + gui.WIDTH / 2
-        y = 120 * ((index % 10) // 2) - 240 + gui.HEIGHT / 2
-        match_buttons.add(Button((200, 60), f'Partida {match_id}',
-                                 on_click(match_id), bg=(134, 184, 53), center=(x, y)))
+        y = 150 * ((index % 8) // 2) - 260 + gui.HEIGHT / 2
+        match_buttons.add(Button(
+            (200, 60),
+            f'Partida {match_id}',
+            on_click(match_id),
+            bg=(134, 184, 53),
+            bg_image='green.png',
+            center=(x, y)))
 
     menu.add(match_buttons)
     page = new_page
@@ -79,7 +84,7 @@ def load_page(new_page):
 
 
 def update_buttons():
-    next_match_index = (page + 1) * 10
+    next_match_index = (page + 1) * 8
     if next_match_index < len(matches):
         menu.add(next_page)
     else:
@@ -96,32 +101,33 @@ def init():
 
     global match_buttons, menu, next_page, prev_page
 
-    bg = Canvas((gui.WIDTH, gui.HEIGHT))
-    bg.image.fill((100, 100, 100))
+    bg = gui.BACKGROUND_GIF
 
     match_buttons = pygame.sprite.Group()
 
-    title = Label((200, 50), 'Carregar Partida',
-                  center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 350),
-                  font=pygame.font.SysFont('monospace', 20, 1))
+    title = Label((260, 50), 'Carregar Partida',
+                  center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 370))
 
     back = Button((160, 50),
                   'Voltar',
                   gui.show_main_menu,
                   bg=(134, 184, 53),
+                  bg_image='red.png',
                   center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 350))
 
     next_page = Button((160, 50),
                        '>',
                        lambda: load_page(page + 1),
                        bg=(134, 184, 53),
-                       midright=(gui.WIDTH - 95, gui.HEIGHT / 2))
+                       bg_image='blue.png',
+                       midright=(gui.WIDTH - 30, gui.HEIGHT / 2 - 20))
 
     prev_page = Button((160, 50),
                        '<',
                        lambda: load_page(page - 1),
                        bg=(134, 184, 53),
-                       midleft=(95, gui.HEIGHT / 2))
+                       bg_image='blue.png',
+                       midleft=(30, gui.HEIGHT / 2 - 20))
 
     event = EventSprite([KEYDOWN], event_handler)
 

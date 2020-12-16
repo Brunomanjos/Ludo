@@ -22,7 +22,7 @@ class TextInput(EventSprite):
         self.image = pygame.Surface(size)
         self.rect = self.image.get_rect(**pos)
         self.action = action
-        self.font = font or pygame.font.SysFont('monospace', 16)
+        self.font = font or pygame.font.Font('res/fonts/LemonMilklight.otf', 16)
         self.bg = bg
         self.fg = fg
         self.text = ""
@@ -100,9 +100,13 @@ class TextInput(EventSprite):
         self._caret_index = max(0, index - 1)
 
     def update(self):
-        self.image.fill(self.bg)
+        self._draw_background()
         self._draw_text()
         self._draw_caret()
+
+    def _draw_background(self):
+        self.image.fill((43, 43, 43))
+        self.image.fill(self.bg, (2, 2, self.rect.w - 4, self.rect.h - 4))
 
     def _draw_text(self):
         text_render = self.font.render(self.text, 1, self.fg)
