@@ -19,7 +19,7 @@ import player
 __all__ = ['MATCH_ENDED', 'MATCH_IN_PROGRESS', 'INVALID_DATA', 'DICE_NOT_THROWN', 'winners',
            'new_match', 'play', 'current_player', 'load_match', 'close_match', 'can_play',
            'CANNOT_MOVE_PIECE', 'MATCH_NOT_DEFINED', 'INVALID_PIECE', 'INVALID_PLAYER',
-           'current_player_name', 'INVALID_ID', 'INVALID_STEPS', 'next_move']
+           'current_player_name', 'INVALID_ID', 'INVALID_STEPS', 'next_move', 'get_dice_value']
 
 MATCH_NOT_DEFINED = -1
 INVALID_PIECE = -2
@@ -33,7 +33,7 @@ INVALID_ID = -9
 CANNOT_MOVE_PIECE = -10
 
 # versão dos arquivos xml, para evitar erros ao carregar uma partida. (Deleta as partidas com versão diferente)
-_XML_VERSION = '0.8'
+_XML_VERSION = '0.9'
 
 match: Optional[dict] = None
 
@@ -72,7 +72,6 @@ def new_match(p1, p2, p3, p4):
 
     current_turn = 0
 
-    database.execute('CREATE TABLE IF NOT EXISTS History(piece_id int, steps int NOT NULL, turn int NOT NULL)')
     database.execute('DELETE FROM History')
 
     return True
@@ -109,9 +108,9 @@ def play(piece_id):
         # Só pode ser None se não há jogada possível
         if can_play(steps):
             return INVALID_PIECE
-        dice.clear()
         next_player()
         save_move(None)
+        dice.clear()
         return
 
     if player != piece.buscaGrupo(piece_id):
@@ -150,7 +149,7 @@ def save_move(piece_id):
     if piece_id is not None:
         database.execute(f'INSERT INTO History VALUES ({piece_id}, {dice.get()}, {current_turn})')
     else:
-        database.execute(f'INSERT INTO History VALUES (NULL, 0, {current_turn})')
+        database.execute(f'INSERT INTO History VALUES (NULL, {dice.get()}, {current_turn})')
 
     current_turn += 1
 
@@ -538,4 +537,23 @@ def next_move():
     return True
 
 
+def get_dice_value():
+    """
+    :return: O valor do dado do turno atual, caso uma partida esteja sendo assistida.
+     MATCH_NOT_DEFINED, caso a partida não tenha sido definida.
+     MATCH_ENDED, caso a partida tenha acabado.
+     None caso a partida atual não esteja sendo assistida.
+    """
+    if not match:
+        return MATCH_NOT_DEFINED
+    elif not match.get('ended'):
+        return False
+    elif current_player() == MATCH_ENDED:
+        return MATCH_ENDED
+
+    return int(match['history'][current_turn]['steps'])
+
+
 check_files()
+
+database.execute('CREATE TABLE IF NOT EXISTS History(piece_id int, steps int NOT NULL, turn int NOT NULL)')

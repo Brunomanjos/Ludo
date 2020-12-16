@@ -43,6 +43,8 @@ class PlayerDialog(EventSprite):
 
     def mouse_up(self, event):
         if self.end_dialog:
+            self.end_dialog = False
+            self._queue.pop(0)
             gui.show_main_menu()
         elif len(self._queue) == 0:
             self.image.fill((0, 0, 0, 147))

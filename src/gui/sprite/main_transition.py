@@ -28,8 +28,8 @@ class MainTransition(EventSprite):
         self.logo_image_2x = pygame.transform.scale2x(self.logo_image)
         self.start_pos = logo.rect.midtop
         self.end_pos = gui.WIDTH / 2, 64
-        self.duration = 2
-        self.frames = int(2 * gui.FPS)
+        self.duration = 3
+        self.frames = int(3 * gui.FPS)
         self._current_frame = 0
         self._on_end = on_end
         self._ended = False
@@ -64,10 +64,10 @@ class MainTransition(EventSprite):
         x, y = self.start_pos
 
         m = self._current_frame / self.frames
-        if m < 0.5:
+        if m < 0.33:
             t = 0
         else:
-            t = 4 * (m - 0.5) ** 2
+            t = 2.2276 * (m - 0.33) ** 2
 
         size = int(2 * self.logo_rect.w - t * self.dw), int(2 * self.logo_rect.h - t * self.dh)
 

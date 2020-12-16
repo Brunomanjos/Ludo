@@ -5,15 +5,12 @@
 
 __all__ = ['get']
 
-from typing import Optional
-
 import pygame
 from pygame.locals import *
 
 import board
 import dice
 import match
-import piece
 import player
 from gui.sprite import *
 
@@ -38,7 +35,10 @@ def update_piece_position(piece, animated):
     piece_square = board.get_piece_position(piece.piece_id)
     new_position = get_pos(piece_square)
     x, y = new_position
-    new_position = int(x + square_size / 2), int(y + square_size - 3)
+    new_position = int(x + square_size / 2), int(y + square_size - 10)
+
+    if len(board.get_pieces_at(board.get_piece_position(piece.piece_id))) > 1:
+        new_position = int(x + square_size / 2), int(y + square_size - 3)
 
     if new_position == piece_position:
         return
@@ -155,24 +155,50 @@ def hide_dice_button():
 
 
 def throw_dice_action():
+    def on_gif_end():
+        show_dialog('Sem jogadas', player_id)
+        show_dialog(match.current_player_name(), match.current_player())
+        hide_dice_button()
+        show_dice_button()
+
     dice.throw()
     dice_value = dice.get()
     player_id = match.current_player()
 
     if not match.can_play(dice_value):
-        show_dice_button()
-        match.play(None)
-        show_dialog(f'Tirou {dice_value} no dado', player_id)
-        show_dialog('Sem jogadas', player_id)
-        show_dialog(match.current_player_name(), match.current_player())
         hide_dice_button()
-        show_dice_button()
+        match.play(None)
+        show_dice_gif(dice_value, on_gif_end)
     else:
         screen.remove(*dice_buttons)
-        show_dialog(f'Tirou {dice_value} no dado', match.current_player())
+        show_dice_gif(dice_value)
+
+
+def show_dice_gif(dice_value, callback=None):
+    dice_gif = dice_gifs[dice_value - 1]
+    dice_gif.on_hide = callback
+    screen.add(dice_gif)
+    dice_gif.run()
+
+
+def showing_gif():
+    return any(gif in screen for gif in dice_gifs)
+
+
+def hide_gif():
+    for gif in dice_gifs:
+        if gif in screen:
+            gif.hide()
 
 
 def events_handler(event):
+    if showing_gif():
+        if event.type in [MOUSEBUTTONDOWN, MOUSEMOTION]:
+            return
+        elif event.type == MOUSEBUTTONUP and not event.consumed:
+            hide_gif()
+            return
+
     if event.type == MOUSEBUTTONUP:
         for piece in selected_pieces:
             on_piece_move(piece)
@@ -196,12 +222,6 @@ def events_handler(event):
 
     elif event.key == K_ESCAPE:
         toggle_pause_menu()
-
-    dice_button = dice_buttons[match.current_player()]
-
-    if event.type == KEYDOWN and event.key == K_SPACE and dice_button in screen \
-            and not event.consumed and pause_menu not in screen:
-        dice_button.action()
 
 
 def get_pieces_at(pos):
@@ -293,17 +313,18 @@ def init():
     menu_bg.handler = lambda e: True
     menu_rect = Rect(0, 0, 300, 200)
     menu_rect.center = (gui.WIDTH / 2, gui.HEIGHT / 2)
-    menu_bg.image.fill((255, 255, 255), menu_rect)
 
     menu_continue = Button((200, 60), 'Continuar', toggle_pause_menu,
-                           bg=(255, 255, 255), bg_image='green_small.png',
-                           center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 45))
+                           bg=(255, 255, 255), bg_image='green.png',
+                           center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 80))
 
     menu_exit = Button((200, 60), 'Sair', exit_game,
-                       bg=(255, 255, 255), bg_image='red_small.png',
-                       center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 45))
+                       bg=(255, 255, 255), bg_image='red.png',
+                       center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 80))
 
     pause_menu = pygame.sprite.Group(menu_bg, menu_continue, menu_exit)
+
+    dice_gifs.extend(gui.DICE_GIFS)
 
     screen = pygame.sprite.Group(bg, image, highlight, pieces, events, players)
 
@@ -324,12 +345,12 @@ def get():
     winners = match.winners()
 
     show_dialog(match.current_player_name(), match.current_player())
-    screen.remove(pause_menu)
+    screen.remove(pause_menu, player_dialog)
 
     return screen
 
 
-pieces, players, selected_pieces, winners, dice_buttons = [], [], [], [], []
+pieces, players, selected_pieces, winners, dice_buttons, dice_gifs = [], [], [], [], [], []
 screen, pause_menu, highlight, player_dialog = None, None, None, None
 square_size, offset_x, offset_y = 59, 0, 0
 show_next_player = False

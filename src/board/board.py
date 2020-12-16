@@ -479,7 +479,7 @@ def get_path(from_pos, piece_group, steps):
 def move_piece(piece_id, steps):
     """
     Move uma peça para uma nova posição.
-    Caso essa peça faça parte de um bloco
+    Caso essa peça faça parte de um bloco, move o bloco.
 
     :param piece_id: id da peça.
     :param steps: quantas casas a peça vai se mover

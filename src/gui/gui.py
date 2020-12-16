@@ -21,7 +21,7 @@ from gui.sprite import *
 
 __all__ = ['loop', 'show_main_menu', 'show_set_players_menu', 'show_board', 'WIDTH',
            'show_load_watch_match_menu', 'show_watch_match_screen', 'CENTER', 'SIZE',
-           'HEIGHT', 'FPS', 'BACKGROUND_GIF', 'exit_gui', 'show_load_match_menu']
+           'HEIGHT', 'FPS', 'BACKGROUND_GIF', 'exit_gui', 'show_load_match_menu', 'DICE_GIFS']
 
 WIDTH = 1200
 HEIGHT = 903
@@ -31,6 +31,7 @@ CENTER = WIDTH / 2, HEIGHT / 2
 
 FPS = 60
 
+DICE_GIFS = [DiceGIF(f'dice/DADO_{i + 1}.gif') for i in range(6)]
 BACKGROUND_GIF = GIF('MAIN MENU/Background main menu looped.gif', True, wait_first_frame=True)
 
 BACKGROUND = (0, 0, 0)
