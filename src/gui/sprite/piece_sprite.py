@@ -31,12 +31,13 @@ class PieceSprite(EventSprite):
         self.color = piece.corPeca(piece_id)
 
         self._images = images[piece.nomeCorPeca(piece_id)]
+        self.image_index = 0
         self.image = self._images[0]
         self.rect = self.image.get_rect(**pos)
 
     def update_block(self):
-        image_index = len(board.get_pieces_at(board.get_piece_position(self.piece_id)))
-        self.image = self._images[image_index - 1]
+        self.image_index = len(board.get_pieces_at(board.get_piece_position(self.piece_id))) - 1
+        self.image = self._images[self.image_index]
 
     def collidepoint(self, point):
         radius = self.rect.w / 2

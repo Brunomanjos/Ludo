@@ -1,5 +1,5 @@
 # Módulo GUI - Menu Principal
-# Atualizado: 12/11/2020
+# Atualizado: 15/12/2020
 # Autor: Bruno Messeder dos Anjos
 
 import pygame
@@ -20,10 +20,13 @@ def load_match_action():
 
 
 def init():
+    def show_buttons():
+        menu.add(new_game, load_game, match_history, exit)
+
     import gui
     global menu
 
-    logo = Image('main menu/LUDO TITULO PRINCIPAL.png', midtop=(gui.WIDTH / 2, 64))
+    logo = Image('main menu/LUDO TITULO PRINCIPAL.png', center=gui.CENTER)
 
     new_game = Button((272, 109),
                       'Novo Jogo',
@@ -55,7 +58,7 @@ def init():
 
     bg = gui.BACKGROUND_GIF
 
-    menu = pygame.sprite.Group(bg, logo, new_game, load_game, match_history, exit)
+    menu = pygame.sprite.Group(bg, logo, MainTransition(logo, show_buttons))
 
 
 def get():

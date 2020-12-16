@@ -13,3 +13,4 @@ from gui.sprite.text_input import *
 from gui.sprite.transition import *
 from gui.sprite.gif import *
 from gui.sprite.player_dialog import *
+from gui.sprite.main_transition import *

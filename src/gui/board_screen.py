@@ -135,9 +135,14 @@ def check_play(piece):
 def on_piece_move(piece):
     check_play(piece)
     update_pieces_positions(True)
+    for piece in pieces:
+        if piece.image_index + 1 > len(board.get_pieces_at(board.get_piece_position(piece.piece_id))):
+            piece.update_block()
 
 
 def show_dice_button():
+    screen.remove(*dice_buttons)
+
     screen.add(dice_buttons[match.current_player()])
 
     if player_dialog in screen:

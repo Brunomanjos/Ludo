@@ -1,11 +1,9 @@
 # Módulo GUI - Assistir uma Partida
-# Atualizado: 30/11/2020
+# Atualizado: 15/12/2020
 # Autor: Bruno Messeder dos Anjos
 
 
 __all__ = ['get']
-
-from typing import Optional
 
 import pygame
 from pygame.locals import *
@@ -27,23 +25,18 @@ def get_pos(square, offset=True):
 
 
 def update_piece_position(piece, animated):
-    piece_position = piece.rect.center
+    piece_position = piece.rect.midbottom
     piece_square = board.get_piece_position(piece.piece_id)
     new_position = get_pos(piece_square)
     x, y = new_position
-    new_position = int(x + square_size / 2), int(y + square_size / 2)
+    new_position = int(x + square_size / 2), int(y + square_size - 3)
 
     if new_position == piece_position:
         return
     elif animated:
-        new_transition = Transition(piece, new_position, 0.3, on_animation_end)
-        for transition in screen:
-            if new_transition.equals(transition):
-                return
-
         screen.add(Transition(piece, new_position, 0.3, on_animation_end))
     else:
-        piece.rect.center = new_position
+        piece.rect.midbottom = new_position
 
 
 def update_pieces_positions(animated):
@@ -71,15 +64,29 @@ def update_finished_players():
             winners.append(player_id)
             name = player.get_player(player_id)
             place = len(winners)
-            show_dialog(f'{name}\nterminou em {place}º lugar')
+            show_dialog(f'{name}\nterminou em {place}º lugar', player_id)
+
+
+def update_piece_block():
+    for piece in pieces:
+        piece.update_block()
 
 
 def on_animation_end():
-    update_blocks()
+    global show_next_player
+
+    update_piece_block()
+
     update_finished_players()
 
-    if match.current_player_name() == match.MATCH_ENDED:
-        on_match_end()
+    if show_next_player:
+        player_name = match.current_player_name()
+        if player_name == match.MATCH_ENDED:
+            on_match_end()
+            return
+
+        show_dialog(player_name, match.current_player())
+        show_next_player = False
 
 
 def on_match_end():
@@ -89,63 +96,35 @@ def on_match_end():
     show_end_dialog('1º Lugar: {}\n2º Lugar: {}\n3º Lugar: {}\n4º Lugar: {}'.format(*names))
 
 
+def show_dialog(text, player_id):
+    player_dialog.show(text, player_id)
+    screen.add(player_dialog)
+
+
 def show_end_dialog(text):
     global end_dialog
 
-    show_dialog(text)
-    end_dialog = True
+    player_dialog.show(text)
+    player_dialog.end_dialog = True
+    screen.add(player_dialog)
 
 
 def events_handler(event):
+    global show_next_player
+
     if event.type == KEYDOWN and event.key == K_ESCAPE:
         toggle_pause_menu()
 
-    if pause_menu in dialog or dialog in screen or event.consumed:
+    if player_dialog in screen or event.consumed:
         return
 
     elif (event.type == MOUSEBUTTONUP and event.button == 1) or (event.type == KEYDOWN and event.key == K_RIGHT):
+        current_player = match.current_player()
         match.next_move()
+        if match.current_player() != current_player:
+            show_next_player = True
+
         update_pieces_positions(True)
-        highlight_player()
-
-
-def highlight_player():
-    highlight = match.current_player()
-    for index, player in enumerate(players):
-        if index == highlight:
-            player.bg = piece.corPeca(index * 4)
-        else:
-            player.bg = (0, 0, 0, 0)
-
-
-def dialog_handler(event):
-    if event.consumed:
-        return
-    elif event.type == MOUSEBUTTONUP:
-        if dialog_queue:
-            dialog.sprites()[1].text = dialog_queue.pop(0)
-        else:
-            hide_dialog()
-    elif event.type == KEYDOWN and event.key == K_SPACE and pause_menu not in screen:
-        hide_dialog()
-    return True
-
-
-def show_dialog(text):
-    if dialog in screen:
-        dialog_queue.append(text)
-    else:
-        dialog.sprites()[1].text = text
-        screen.add(dialog)
-
-
-def hide_dialog():
-    import gui
-
-    dialog_queue.clear()
-    screen.remove(dialog)
-    if end_dialog:
-        gui.show_main_menu()
 
 
 def toggle_pause_menu():
@@ -168,7 +147,7 @@ def update_player_names():
 
 def init():
     import gui
-    global screen, pieces, offset_x, offset_y, square_size, dialog, pause_menu
+    global screen, pieces, offset_x, offset_y, square_size, pause_menu, player_dialog
 
     # background
     bg = Canvas((gui.WIDTH, gui.HEIGHT))
@@ -197,14 +176,7 @@ def init():
     players.append(Label((offset_x, 60), names[3], midleft=(0, label_y)))
 
     # diálogo de jogada
-    dialog_bg = Canvas((gui.WIDTH, gui.HEIGHT), True)
-    dialog_bg.image.fill((0, 0, 0, 147))
-    dialog_bg.events = [MOUSEBUTTONUP, MOUSEBUTTONDOWN, MOUSEMOTION, KEYDOWN]
-    dialog_bg.handler = dialog_handler
-
-    dialog_label = Label((270, 120), '', bg=(255, 255, 255), center=(gui.WIDTH / 2, gui.HEIGHT / 2))
-
-    dialog = pygame.sprite.Group(dialog_bg, dialog_label)
+    player_dialog = PlayerDialog()
 
     # menu de pause
     menu_bg = Canvas((gui.WIDTH, gui.HEIGHT), True)
@@ -232,23 +204,20 @@ def get():
     """
     Inicializa a tela do tabuleiro e retorna os sprites presentes na tela.
     """
-    global end_dialog
 
     if not screen:
         init()
 
     update_pieces_positions(False)
     update_player_names()
-    highlight_player()
     update_blocks()
-    end_dialog = False
 
     screen.remove(pause_menu)
 
     return screen
 
 
-screen, dialog, pause_menu = None, None, None
-pieces, players, winners, dialog_queue = [], [], [], []
+screen, pause_menu, player_dialog = None, None, None
+pieces, players, winners = [], [], []
 square_size, offset_x, offset_y = 59, 0, 0
-end_dialog = False
+show_next_player = False

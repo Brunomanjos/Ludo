@@ -1,5 +1,5 @@
 # Sprites - Label
-# Atualizado: 30/10/2020
+# Atualizado: 15/12/2020
 # Autor: Bruno Messeder dos Anjos
 
 import pygame

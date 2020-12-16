@@ -1,5 +1,5 @@
 # Sprites - Transição
-# Atualizado: 30/11/2020
+# Atualizado: 15/12/2020
 # Autor: Bruno Messeder dos Anjos
 
 import pygame
