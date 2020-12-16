@@ -188,12 +188,12 @@ def init():
     menu_bg.image.fill((255, 255, 255), menu_rect)
 
     menu_continue = Button((200, 60), 'Continuar', toggle_pause_menu,
-                           bg=(255, 255, 255), fg=(134, 184, 53),
-                           center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 40))
+                           bg=(255, 255, 255), bg_image='green_small.png',
+                           center=(gui.WIDTH / 2, gui.HEIGHT / 2 - 45))
 
     menu_exit = Button((200, 60), 'Sair', exit_game,
-                       bg=(255, 255, 255), fg=(134, 184, 53),
-                       center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 40))
+                       bg=(255, 255, 255), bg_image='red_small.png',
+                       center=(gui.WIDTH / 2, gui.HEIGHT / 2 + 45))
 
     pause_menu = pygame.sprite.Group(menu_bg, menu_continue, menu_exit)
 
