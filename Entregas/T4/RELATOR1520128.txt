@@ -1,4 +1,4 @@
-autor: Alberto Augusto Caldeira Brant
+Autor: Alberto Augusto Caldeira Brant
 
 Requisitos do GUI:
 	Horas trabalhadas: 14 Horas
