@@ -1,8 +1,5 @@
 autor: Alberto Augusto Caldeira Brant
 
-Requisitos do módulo Piece e testes:
-	Horas trabalhadas: 2 Horas
-	
-Estudos sobre Python/Modularização/Classes/PyGame e GUI:
-	Horas trabalhadas: 5 Horas
-
+Requisitos do GUI:
+	Horas trabalhadas: 14 Horas
+ 
