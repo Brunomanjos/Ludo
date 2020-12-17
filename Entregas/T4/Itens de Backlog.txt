@@ -1,0 +1,20 @@
+Estudo Banco de Dados
+Estudo da biblioteca pygame
+Definir design e estética
+Módulo Main
+Testes do Módulo Main
+Módulo GUI
+Testes do Módulo GUI
+Módulo Database
+Testes do Módulo Database
+Módulo Board
+Testes do Módulo Board
+Módulo Piece
+Testes do Módulo Piece
+Módulo Player
+Testes do Módulo Player
+Módulo Match
+Testes do Módulo Match
+Definição dos menus
+Definição das animações
+Definição dos efeitos sonoros
